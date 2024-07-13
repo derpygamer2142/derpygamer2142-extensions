@@ -1,4 +1,5 @@
 import { error } from "@sveltejs/kit"
+import { pages } from "../pages.js"
 
 // async function get(u, fetch) {
 //     const a = await fetch(`/docs/gpusb3/${u}.svelte`)
@@ -8,6 +9,7 @@ import { error } from "@sveltejs/kit"
 //     return r
 // }
 export async function load({ fetch, params }) {
+    if (!pages.includes(params.slug)) throw error(404)
     return {
         data: params.slug
     }//await get(params.slug, fetch)

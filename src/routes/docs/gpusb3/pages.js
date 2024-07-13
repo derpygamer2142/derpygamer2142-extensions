@@ -1,3 +1,4 @@
 export const pages = [
-    "basics"
+    "basics",
+    "blocks"
 ]

@@ -5,10 +5,10 @@
 
 <h2>Derpygamer2142's extensions and maybe other stuff idk</h2>
 
-<p>placeholder text</p>
+<p class="notdoc">placeholder text</p>
 
 <div id="extensions">
-    <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
+    <ExtensionButton imgsrc="SoupCat" name="GPU.sb3.js" description="this extension is so cool" file="https://raw.githubusercontent.com/derpygamer2142/example-extensions-fork/master/extensions/derpygamer2142/test.js"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>

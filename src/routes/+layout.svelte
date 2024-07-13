@@ -45,5 +45,4 @@ wrangler pages deploy .svelte-kit/cloudflare --branch=master
         overflow: hidden;
         
     }
-    
 </style>

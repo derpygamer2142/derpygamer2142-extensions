@@ -14,8 +14,8 @@
 
 <button on:click={go}>
     <img src={img} alt={imgsrc}>
-    <p>{name}</p>
-    <p id="desc">{description}</p>
+    <p class="notdoc">{name}</p>
+    <p id="desc" class="notdoc">{description}</p>
 </button>
 
 

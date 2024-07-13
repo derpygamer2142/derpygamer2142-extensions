@@ -6,6 +6,7 @@
     <a href="/">Home</a>
     <a href="/docs">Docs</a>
     <a href="404">Demos</a>
+    <a href="404">Fourth thing</a>
 </div>
 
 <style>
