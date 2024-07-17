@@ -8,7 +8,7 @@
 <p class="notdoc">placeholder text</p>
 
 <div id="extensions">
-    <ExtensionButton imgsrc="SoupCat" name="GPU.sb3.js" description="this extension is so cool" file="https://raw.githubusercontent.com/derpygamer2142/example-extensions-fork/master/extensions/derpygamer2142/test.js"/>
+    <ExtensionButton imgsrc="GPUSb3Thumbnail" name="GPU.sb3.js" description="this extension is so cool" file="https://raw.githubusercontent.com/derpygamer2142/example-extensions-fork/master/extensions/derpygamer2142/test.js"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
     <ExtensionButton imgsrc="SoupCat" name="extension that does things" description="this extension is so cool"/>
@@ -21,8 +21,8 @@
 <style>
     #extensions {
         display: block;
-        width: 50vw;
+        width: 55vw;
         position: relative;
-        left: 25vw;
+        left: 22.5vw;
     }
 </style>

@@ -56,7 +56,7 @@
         margin-bottom: 15px;
     }
     img {
-        width: 15vw;
+        width: 16vw;
         height: 8vw;
         border-radius: 3px;
     }

@@ -12,7 +12,7 @@
 
 
 <div id="docs">
-    <DocButton imgsrc="SoupCat" name="GPU.sb3" description="An extension that allows you to run scratch code on the gpu." link="/docs/gpusb3"/>
+    <DocButton imgsrc="GPUSb3Thumbnail" name="GPU.sb3" description="An extension that allows you to run scratch code on the gpu." link="/docs/gpusb3"/>
 </div>
 
 <style>
