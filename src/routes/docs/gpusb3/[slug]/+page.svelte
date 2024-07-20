@@ -1,6 +1,8 @@
 <script>
     import Basics from "./Basics.svelte"
     import Blocks from "./Blocks.svelte"
+    import Quirks from "./Quirks.svelte"
+    import Resources from "./Resources.svelte"
     import Spacer from "$lib/Spacer.svelte"
     import { goto } from "$app/navigation"
     import { onMount } from "svelte"
@@ -12,6 +14,7 @@
     $: p = data.data
 
     $: nexti = pages.indexOf(p)
+    $: previous = nexti === -1 ? "404" : (nexti-1 >= 0 ? pages[nexti-1] : "-1")
     $: next = nexti === -1 ? "404" : (nexti+1 < pages.length ? pages[nexti+1] : "-1")
 
 </script>
@@ -22,13 +25,21 @@
     <Basics />
 {:else if p === "blocks"}
     <Blocks />
+{:else if p === "quirks"}
+    <Quirks />
+{:else if p === "resources"}
+    <Resources />
 {/if}
 
 <Spacer space="100px" />
 
-{#if next === "404"}
-<p>Page not found!</p>
-{:else if next === "-1"}
+
+{#if previous !== "-1"}
+<h2>Previous page: <a href="/docs/gpusb3/{previous}">{previous}</a></h2>
+{/if}
+
+
+{#if next === "-1"}
 <h2>You've reached the end of the documentation(for now), good luck!</h2>
 {:else}
 <h2>Next page: <a href="/docs/gpusb3/{next}">{next}</a></h2>

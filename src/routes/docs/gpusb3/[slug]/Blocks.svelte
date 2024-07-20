@@ -547,6 +547,56 @@
     <p>args - The arguments to pass to the function. Accepts an input of <a href="#functionArgInput">function arg input blocks</a>, or comma seperated values in the text input.</p>
 </ul>
 
+<Spacer space="50px" />
+<h2>Supported non-gpu.sb3 blocks</h2>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    if &lt; &gt; {oc}
+
+    {cc} :: control
+
+    if &lt; &gt; {oc}
+
+    {cc} else {oc}
+
+    {cc} :: control
+</pre>
+
+<p>If, if-else.</p>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    () + () :: math
+    () - () :: math
+    () * () :: math
+    () / () :: math
+</pre>
+<p>These two input math blocks</p>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    () &gt; () :: math
+    &lt; () &lt; () &gt;
+    () = () :: math
+</pre>
+<p>Comparison blocks</p>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    &lt; &gt; and &lt &gt; :: math
+    &lt; &gt; or &lt &gt; :: math
+    not &lt &gt; :: math
+</pre>
+<p>Boolean operators</p>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    () mod ()
+    [abs v] of ()
+</pre>
+<p>Mod, operator blocks.</p>
+
 <Spacer space="100px" />
 <p>Wow, that's a lot of blocks.</p>
 <h2>If you see something incorrect, missing, or you have any questions DM derpygamer2142 on discord.</h2>

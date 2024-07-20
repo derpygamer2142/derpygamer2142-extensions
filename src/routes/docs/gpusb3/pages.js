@@ -1,4 +1,6 @@
 export const pages = [
     "basics",
-    "blocks"
+    "blocks",
+    "quirks",
+    "resources" // note to self: this page will be last
 ]
