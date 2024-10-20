@@ -44,10 +44,10 @@
 <p>Now that everything is (hopefully) working correctly, we can start making our first shader. The def shader hat is used to create a new shader.</p>
 
 <pre class="blocks">
-    Def shader [Shader name] with resources [inputs] :: hat {color1}
+    Def shader [Shader name] using bind group layout [Bind group layout] :: hat {color1}
 </pre>
 
-<p>The def shader hat has 2 arguments. The first, the shader name, is how you call and read data from the shader(see <a href="404">run function block</a>). This must only use the text input, you can't add blocks. You can name it whatever you want. Then, there's the <a href="/docs/gpusb3/basics#shaderResources">shader resources</a>, explained below. You can attach code to the hat, which is what makes up your shader. Be careful, as not all blocks are supported. You can see the list of supported blocks <a href="/docs/gpusb3/blocks">here</a>. Let's make a basic shader that takes in a list and returns the list with every item doubled. We can use the Compute shader C block to define what our shader will do when it is run:</p>
+<p>The def shader hat has 2 arguments. The first, the shader name, is how you call and read data from the shader(see <a href="404">run function block</a>). This must only use the text input, you can't add blocks. You can name it whatever you want. Then, there's the <a href="/docs/gpusb3/basics#bindGroupLayout">bind group layout</a>, explained below. You can attach code to the hat, which is what makes up your shader. Be careful, as not all blocks are supported. You can see the list of supported blocks <a href="/docs/gpusb3/blocks">here</a>. Let's make a basic shader that takes in a list and returns the list with every item doubled. We can use the Compute shader C block to define what our shader will do when it is run:</p>
 
 <pre class="blocks">
     Compute shader with workgroup size [[1\]] {oc}
@@ -106,7 +106,7 @@
 <p>This will create a new variable with the name specified in variable name, with an initial value of start. It will run the code in the c, then increment variable name. If the variable is more than end, it stops. We can use this to go through our array, since we can read the value of the variable we are incrementing using the get variable block:</p>
 
 <pre class="blocks">
-    Def shader [doublingShader] with resources [] :: hat {color1}
+    Def shader [doublingShader] with bind group layout [] :: hat {color1}
     Compute shader with workgroup size [[1\]] {oc}
         Declare (var v) variable as [data] with value (Construct type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [3] :: reporter {color1}) with values [1.0, 2.0, 3.0] :: reporter {color1}): (auto v) :: {color1}
         For [i] in [0], [2] {oc}
@@ -121,7 +121,7 @@
 <p>Great! Our shader is done, and we can double the numbers in the array. Now we just need to run it. However, first we need to compile our shaders so they can be run. You can do this with the compile shaders block:</p>
 
 <pre class="blocks">
-    Def shader [doublingShader] with resources [] :: hat {color1}
+    Def shader [doublingShader] with bind group layout [] :: hat {color1}
     Compute shader with workgroup size [[1\]] {oc}
         Declare (var v) variable as [data] with value (Construct type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [3] :: reporter {color1}) with values [1.0, 2.0, 3.0] :: reporter {color1}): (auto v) :: {color1}
         For [i] in [0], [2] {oc}
@@ -134,17 +134,17 @@
 </pre>
 
 <p><small>Ideally you should only compile your shaders when you make changes, or when your project is run for the first time as it can be pretty slow depending on the number and length of your shaders. We are doing it when the flag is clicked here for simplicity.</small></p>
-
+<!-- todo: errors here -->
 <p>Now when you press the flag your shader will be compiled! Check the console using f12(or whatever button it is on your browser) and look for any errors or warnings. If you see something along the lines of "invalid input", it means you put a block where a block isn't allowed to go. If you see something like "invalid opcode", it means you used an unsupported block in your shader. If you see any other errors, dm derpygamer2142 on discord. Now we can finally run our shader! This is done using the run shader block:</p>
 
 <pre class="blocks">
-    Run shader [shader name] with resources ( :: {color3}) dimensions x: [x dim] y: [y dim] z: [z dim] :: {color1}
+    Run shader [shader name] using bind group [bind group name] dimensions x: [x dim] y: [y dim] z: [z dim] :: {color1}
 </pre>
 
 <p>Our shader name is whatever our shader is called, and the args is explained later. The dimensions are the number of workgroups on each axis, which is explained <a href="404">here</a>. For now, let's just dispatch 1 workgroup per axis.</p>
 
 <pre class="smallblocks">
-    Def shader [doublingShader] with resources [] :: hat {color1}
+    Def shader [doublingShader] with bind group layout [] :: hat {color1}
     Compute shader with workgroup size [[1\]] {oc}
         Declare (var v) variable as [data] with value (Construct type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [3] :: reporter {color1}) with values [1.0, 2.0, 3.0] :: reporter {color1}): (auto v) :: {color1}
         For [i] in [0], [2] {oc}
@@ -154,7 +154,7 @@
 
     when green flag clicked
     compile shaders :: {color1}
-    Run shader [doublingShader] with resources ( :: {color3}) dimensions x: [1] y: [1] z: [1] :: {color1}
+    Run shader [doublingShader] with bind group [] dimensions x: [1] y: [1] z: [1] :: {color1}
 </pre>
 
 <p>Now you can click the green flag and hopefully have any errors! If you see something mentioning an error parsing wgsl, then something in your shader is wrong. Otherwise you should be good! Now, you may be thinking <i>"this is a great shader, finally I can easily and quickly double my hardcoded list of 3 numbers, but it would be great if I could give the shader an array to double instead of it being hardcoded!"</i>. Well you're in luck, because you can do this in the form of</p>
@@ -170,83 +170,58 @@
 
 <h2 id="shaderResources">Shader resources</h2>
 
-<p>Your shader will be pretty much useless if it can't interact with the project, so you can define usable resources for your shader to access using the def shader resource block:</p>
+<p>Your shader will be pretty much useless if it can't interact with the project, so you need to define some stuff to be able to provide your shader with data:</p>
 
-<pre class="smallblocks">
-    Def shader resource [resource name] type (resource type v) usage [resource usage] settings [resource settings] usage type (binding type v) next [] :: reporter {color1}
+<pre class="blocks" id="bindGroupLayout">
+    Create bind group layout called [bindGroupLayoutName] {oc}
+        Add bind group layout entry with binding [bindingNumber] for type (bindingType v) and descriptor [bindGroupLayoutEntryDescriptor] :: {color1}
+    {cc} :: color {color1}
 </pre>
 
-<p id="nextExplanation"><small>You will see <code>some block, next ()</code> very often. This means that there is a list of that block, and you put either nothing, (rarely) a value, or another one of that block into the next slot. It will look something like this:</small></p>
+<h3>Bind groups and bind group layouts</h3>
 
-<pre class="vsmallblocks">
-    Some block that does things, next (Some block that does things, next [] :: reporter {color1}) :: reporter {color1}
-</pre>
+<p>To provide our shader with inputs, we need to first describe what inputs the shader is going to have, otherwise the gpu is essentially going to need to guess based on your shader's code, which isn't ideal. The things that describe how your inputs are used are called "bind group layouts". They tell the gpu what kind of resource is going in what binding. Here's what the extension's blocks to do this look like:</p>
 
-<Spacer space="50px" />
-
-<p>That's a lot of inputs, so we'll go over them one at a time:</p>
-
-<Spacer space="50px" />
-<h3>Resource name</h3>
-<p>The resource name is sometimes how you reference the resource, but it is also used when logging errors in the console. <strong>You cannot put blocks for this input!</strong></p>
-
-<Spacer space="50px" />
-<h3>Resource type</h3>
-<p>Currently the only supported resource type is buffers. A buffer is similar to a list, except that it can be used to represent all kinds of data formats, but it must be typed(this only matters in your shader code, but more on that <a href="404">later</a>). <strong>You cannot put blocks for this input!</strong></p>
-
-<Spacer space="50px" />
-<h3>Resource usage</h3>
-<p>This input defines how your buffer will be used. <strong>You must use the Buffer usage block here!</strong></p>
-
-<pre class="blocks">
-    Buffer usage (usage v), next [] :: reporter {color1}
-</pre>
-
-<p>The buffer usage block has a list of options that will describe a component of how your resource will be used. It's recommended that you mess around to see how you can combine multiple resources and usage combinations to get the most out of your resources:</p>
 <ul>
-    <p>These will dictate how your resource is used in your project.</p>
-    <li>MAP_READ - Your resource can be read from using the read buffer block. The only other valid usage with this type is COPY_DST.</li>
-    <li>MAP_WRITE - This pretty much does nothing in this extension right now, but more features may be added in the future. You should not use this, the only other valid usage with this type is COPY_SRC</li>
-    <li>COPY_SRC - This can be the resource you are copying from using the copy data block. </li>
-    <p><small>Note: this has no restrictions, only MAP_READ restricts the valid combinations! This goes for COPY_DST as well.</small></p>
-    <li>COPY_DST - This can be the resource you are copying data to in the copy data block. You need this usage to be able to use an input array in the <a href="404">bind resource block</a>!</li>
-    
-    <Spacer space="25px" />
-    <p id="resourceShaderUsage">These will dictate how your resource is used in your <i>shader</i>. You can see how this is used <a href="404">here</a>.</p>
+    <p>Create bind group layout block's inputs</p>
+    <li>bindGroupLayoutName - This is the name that you will use to reference your bind group layout. All your bind group layout entry blocks go inside this block.</li>
 
-    <li id="uniformBufferUsage">UNIFORM - This is an input resource that will not and cannot be modified in your shader. Used with the uniform usage type.</li>
-    <li id="storageBufferUsage">STORAGE - This resource can be used to store changing data. Used with the storage and read_only_storage usage types.</li>
+    <p>Bind group layout entry block's inputs</p>
+    <li>bindingNumber - The binding number you are describing. A binding number is a slot in the list of possible inputs you can give your shader.</li>
+    <li>bindingType - The type of resource you are going to put in this slot. Here's the possible values for this:</li>
+    <ul>
+        <li>buffer - Essentially just a list, but instead of items it sometimes has individual bytes. A buffer can only have numbers in it.</li>
+    </ul>
+    <li>bindGroupLayoutEntryDescriptor - Fancy name, fairly simple input. Takes an input of a  entry descriptor block(explained below). This input describes how this slot will be used, and the type of descriptor depends on the bindingType.</li>
+
+    <p>Entry descriptor blocks</p>
+    <p>Which of these blocks to use depends on the bindingType input.</p>
+    <ul>
+        <pre class="blocks">
+            Buffer layout entry descriptor with usage type (usageType v) :: {color1} reporter
+        </pre>
+        <li>Usage type - How this buffer will be used. read-only-storage is for a buffer that will only be read from, storage is for a buffer that will be written to and possibly read from, uniform is essentially read-only-storage but it's optimized for buffers that won't change much(or at all).</li>
+    </ul>
 </ul>
 
-<p>Since this can be a bit confusing, here are some examples:</p>
+<p>That's a lot, hopefully our usage of these will help explain a little more. We only need one buffer, which we will use for passing data to and from our shader.</p>
+<small>Hey! This isn't best practice, usually you would have seperate buffers for passing data to and from the gpu.</small>
+
+<pre class="blocks" id="bindGroupLayout">
+    when flag clicked
+    Create bind group layout called [doublingBGL] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: color {color1}
+    compile shaders :: {color1}
+    run shader [doublingShader] with bind group [] dimensions x: [1] y: [1] z: [1] :: {color1}
+</pre>
+
+
+<p>Now we need to alter our shader's code to use inputs. We set the bindGroupLayout input in the hat to the name of our bindGroupLayout, which is doublingBGL here.</p>
 <pre class="blocks">
-    Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}
+    Def shader [doublingShader] with bind group layout [doublingBGL] :: hat {color1}
 </pre>
-<p>This usage combination allows you to give the buffer an input array(via COPY_DST) and use it in you shader(STORAGE). However, you can't read from this buffer, so we also give it the COPY_SRC usage so we can copy it to another buffer:</p>
-<pre class="blocks">
-    Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}
-</pre>
-<p>This combination would allow you to copy the buffer from the other usage combination to this one(COPY_DST), and then read the buffer in your project(MAP_READ).</p>
-
-<Spacer space="50px" />
-<h3>Resource settings</h3>
-<p>This accepts json describing resource type-specific settings. Since the only currently implemented input type is buffers, you can only define the size. This is in bytes(there's 4 bytes in one item of the f32 array, so just multiply the number of items in the list you want by 4. This might not work in the future with more array types and such). In our case the length of a 3 item array is 12 bytes. <strong>You cannot put blocks for this input!</strong></p>
-
-<Spacer space="50px" />
-<h3>Usage type</h3>
-<p>This describes how your resource is used in your shader, this goes together with <a href="/docs/gpusb3/basics#resourceShaderUsage">these buffer usages</a>. Use NONE if you just want your buffer to be used in your project, and not bound in your shader (not a storage buffer)</p>
-
-<Spacer space="50px" />
-<h3>Next</h3>
-<p>See <a href="/docs/gpusb3/basics#nextExplanation">explanation of next inputs</a></p>
-
-<Spacer space="100px" />
-<h2>The full hat</h2>
-<p>Now that we've got all the blocks used in the hat, we can put them together into what a basic input/output shader might look like:</p>
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
-</pre>
-<p>That's pretty large, and might not fit on your screen. You can download the image <a href={assets.FullBasicsHat} download="Full hat" target="_blank">here</a>, or just zoom as the image is an svg. Anyways, now we want to be able to use the first buffer(which will contain the input array) and double the inputs. We can do this with the bind buffer block in our shader:</p>
+<p>Now we want to be able to use the first buffer(which will contain the input array) and double the inputs. We can do this with the bind buffer block in our shader:</p>
 
 <pre class="blocks">
     Bind shader resource #[binding number] to variable [variable] with settings [variable usage settings] type (variable type v) :: {color1}
@@ -264,7 +239,7 @@
     <p>These settings describe how you can access the variable:</p>
     <li>read - You can read from this variable</li>
     <li>write - You can write to this variable</li>
-    <li>read_write - You can read and write. Not sure what the difference is between this and the above two.</li>
+    <li>read_write - You can read and write. Not sure what the difference is between this and the above two, probably some internal optimization stuff.</li>
 
     <p>These settings describe when you can access the variable:</p>
     <li>function - You can only access it from the same function that it is declared? Not too sure.</li>
@@ -273,6 +248,7 @@
     <li>uniform - This is used with the <a href="#uniformBufferUsage">uniform usage type in input buffers.</a></li>
     <li>storage - This is used with the <a href="#storageBufferUsage">storage usage type in input buffers.</a> </li>
 </ul>
+<p>Note: The order of these usage settings does actually matter! Put the usage of how you will access the variable first(for example: storage), followed by the access settings.</p>
 
 <Spacer space="50px" />
 <p>Back to the Bind shader resource block, the last input in this block is the variable type. This can be any type you want, but for our case it will be an array of floats. We want to be able to read and write to it, so we give it that usage, and since it's a storage buffer we give it the storage usage type. Here's what our block looks like:</p>
@@ -283,8 +259,8 @@
 
 <p>Now that we have our input buffer, we can get rid of our other array, leading our shader code to look like this:</p>
 
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
+<pre class="smallblocks">
+    Def shader [doublingShader] with resources [doublingBGL] :: hat {color1}
     Bind shader resource #[0] to variable [data] with settings (Variable usage (read_write v) next (Variable usage (storage v) next [] :: reporter {color1}) :: reporter {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: reporter {color1}) :: {color1}
     Compute shader with workgroup size [[1\]] {oc}
         For [i] in [0], [2] {oc}
@@ -295,110 +271,184 @@
 
 <p><small>(an image will be provided when all the code is done)</small></p>
 
-<p>To provide this buffer to our shader, we need to add some more code in our run gpu block using the bind type block:</p>
 
+<p>Alright, our shader is prepped to recieve some data, now we just need to give it that data. First, we create our data, in this case buffers.</p>
 <pre class="blocks">
-    bind type (type v) to [binding number], input [the resource input, if any] next () :: reporter {color1}
+    Create buffer called [bufferName] with size\(in bytes\) [size] and usage flags [usageFlags] :: {color1}
 </pre>
 
-<p>Currently the only available binding type is a buffer, so we will do that. Our binding number will be 0. The resource input will either be blank or take in a resource, currently the only available one is an f32 array:</p>
+<p>As mentioned before, a buffer is basically just a list except it only allows numbers, and instead of items in the list you can have individual bytes. Here's how you use the above block:</p>
 
-<pre class="blocks">
-    F32 array from array [\[1, 2, 3\]] :: reporter {color1}
-</pre>
-<p><small>You can use the json extension to make the input for this block.</small></p>
+<ul>
+    <li>bufferName - The name you will use to reference the buffer.</li>
+    <li>size - The number of bytes in the buffer. If you don't know what a byte is, god help you.</li>
+    <li>usageFlags - How the buffer will be used. These are individual flags from the Buffer usage block, that you combine using the "usage () | () " block. Here's some more info on that...</li>
+    <pre class="blocks">
+        Buffer usage (usage v) :: reporter {color1}
+        Usage [] | [] :: reporter {color1}
+    </pre>
+    <ul>
+        <p>Buffer usage block - This is an individual flag to describe how a buffer will be used. It's possible values are:</p>
+        <li>COPY_SRC - This can be the source buffer in the <a href="404">copy data block</a>.</li>
+        <li>COPY_DST - This can be the destination buffer in the copy data block, and you can write data to it using the <a href="404">write data block</a>.</li>
+        <li>MAP_READ - You can read from this buffer using the <a href="404">read buffer block</a>.</li>
+        <li>MAP_WRITE - You can write to this buffer when it's been mapped. Currently unimplemented, so dw about it</li>
+        <li>QUERY_RESOLVE - No clue, but I haven't needed to use it anywhere and there's nothing implemented that uses it so dw about this</li>
+        <li>STORAGE - This buffer can be written and read from by your shader.</li>
+        <li>UNIFORM - This buffer will only be read from by your shader.</li>
+        <p>Usage | block - This just lets you string together usage flags. Put a flag or another usage block in the inputs.</p>
+    </ul>
 
-<p>Here's what our binding for the input/output buffer will look like: </p>
+</ul>
 
-<pre class="blocks">
-    bind type (buffer v) to [0], input (F32 array from array [\[1, 2, 3\]] :: reporter {color1}) next (bind type (buffer v) to [0], input () next () :: reporter {color1}) :: reporter {color1}
-</pre>
-
-<p>Now we can put it in our run gpu block, and we can give our shader an input!</p>
-
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
-    Bind shader resource #[0] to variable [data] with settings (Variable usage (read_write v) next (Variable usage (storage v) next [] :: reporter {color1}) :: reporter {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: reporter {color1}) :: {color1}
-    Compute shader with workgroup size [[1\]] {oc}
-        For [i] in [0], [2] {oc}
-            Variable (In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) (= v) ((In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) * [2.0] :: math) :: {color1}
-        {cc} :: {color1}
-    {cc} :: {color1}
-
-    when green flag clicked
-    compile shaders :: {color1}
-    Run shader [doublingShader] with resources (bind type (buffer v) to [0], input (F32 array from array [\[1, 2, 3\]] :: reporter {color1}) next (bind type (buffer v) to [0], input ( :: {color3}) next () :: reporter {color1}) :: reporter {color1}) dimensions x: [1] y: [1] z: [1] :: {color1}
-</pre>
-
-<p>This is cool, but we still can't see the output. We need to copy the input buffer to our output buffer. We can do this with the copy data block:</p>
+<p>We'll need 2 buffers: One for our buffer to read/write from and one get our data from the gpu to our project. Here's what this looks like:</p>
 
 <pre class="smallblocks">
-    Copy [number of bytes] bytes of data from buffer at binding [binding num] in shader [shader name] from position [start pos in buffer 1] to buffer at binding [binding num] in shader [shader name] at position [start pos in buffer 2] :: {color1}
+    Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+</pre>
+<p>Our first buffer, inputBuffer, has the flags STORAGE(so our shader can read and write from it), COPY_DST(so we can write the data we want our shader to double to it), and COPY_SRC(so we can copy the buffer to the read buffer after running our shader)</p>
+<p>Our second buffer, readBuffer, has the flags COPY_DST(so we can copy the data from inputBuffer to it), and MAP_READ(so we can read from it).</p>
+
+<Spacer space="15px" />
+<p>To actually write the data to inputBuffer, we can use the writeData block.</p>
+<pre class="blocks">
+    Write [amount] elements of data from array [array] to buffer [bufferName] from offset [off1] to offset [off2] :: {color1}
+    F32 array from array [array] :: reporter {color1}
 </pre>
 
-<p>That's a lot of inputs. The number of bytes(remember, in a f32 array there are 4 bytes per item in the array) is how many bytes(must be a multiple of 4) of data you want to copy. The binding numbers are the bindings that you specified in the run gpu block. The shader names are the names of the shaders, these don't need to be the same(I think, untested)! The first start position is where you will start copying data from. The second start position is where you will start putting that data. In our case, we are copying 12 bytes of data(3 items) from buffer 0 in doublingShader from position 0 to buffer 1 in doublingShader at position 0. That looks like this:</p>
+<ul>
+    <p>Write data - writes data</p>
+    <li>amount - For a typedArray(currently the only available kind of array), this is in elements. Otherwise in bytes.</li>
+    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="404">f32 array</a>.</li>
+    <li>bufferName - The buffer to write to.</li>
+    <li>off1 - The offset to start reading from, see note in amount.</li>
+    <li>off2 - The offset to start writing to, see note in amount.</li>
+    <p>f32 array - returns an array of data(technically a reference to one)</p>
+    <li>array - A stringified list. You can make this using the json extension.</li>
+</ul>
+
+<p>Since we're using float32s, and there's 4 bytes in 32 bits, and we are using a buffer length of 12 bytes, our array will have a length of 3. Here's what our writing code looks like:</p>
+
+<pre class="blocks">
+    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    
+</pre>
+
+<p>Adding all of that to our existing code and we have</p>
 
 <pre class="smallblocks">
-    Copy [12] bytes of data from buffer at binding [0] in shader [doublingShader] from position [0] to buffer at binding [1] in shader [doublingShader] at position [0] :: {color1}
+    when flag clicked
+    Create bind group layout called [doublingBGL] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: color {color1}
+    Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    compile shaders :: {color1}
+    run shader [doublingShader] with bind group [] dimensions x: [1] y: [1] z: [1] :: {color1}
 </pre>
 
-<p>We can add that to our code, but we <i>still</i> can't read our data! Luckily there's only a few more blocks needed. We can use the Read buffer block:</p>
+<Spacer space="50px" />
+<p>We're almost done, we just need to pass inputBuffer to our shader and then we can read the data after we've run the shader. We can do this by creating a bind group. A bind group essentially passes data to the bindings you described in your bind group layout. Here's what it looks like:</p>
 
 <pre class="blocks">
-    Read buffer at binding [binding] in shader [shader name] :: {color1}
+    Create bind group called [bindGroupName] using layout [bindGroupLayoutName] {oc}
+        Add bind group entry with binding [bindingNumber] of type (bindingType v) using resource named [resourceName] :: {color1}
+    {cc} :: {color1}
 </pre>
 
-<p>Once again, binding is the binding, shader name is the shader. This part isn't very complicated. This will set the buffer read output block to the result:</p>
+<ul>
+    <p>Create bind group block - Similar to the create bind group layout block where we put the entries inside of it, but this actually binds the resources to the given slots.</p>
+    <li>bindGroupName - The name that we will use to reference this bind group</li>
+    <li>bindGroupLayoutName - The bind group layout to use in this bind group. We'll be using the one we defined earlier, doublingBGL</li>
+
+    <p>Bind group entry block - Adds a binding entry to the bind group it's inside of, this binds a resource to the given slot.</p>
+    <li>bindingNumber - The binding slot to bind the resource to</li>
+    <li>bindingType - The type of resource to bind to this slot. In our case, it's a buffer.</li>
+    <li>resourceName - The name of the resource to bind to this slot. In our case, we're binding the buffer called inputBuffer</li>
+
+</ul>
+
+<p>Our bind group looks like this:</p>
+<pre class="blocks">
+    Create bind group called [doublingBG] using layout [doublingBGL] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>We can throw that in our code, and update the run shader block to use our new bind group:</p>
+<pre class="smallblocks">
+    when flag clicked
+    Create bind group layout called [doublingBGL] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: color {color1}
+    Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create bind group called [doublingBG] using layout [doublingBGL] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
+    {cc} :: {color1}
+    compile shaders :: {color1}
+    run shader [doublingShader] with bind group [doublingBG] dimensions x: [1] y: [1] z: [1] :: {color1}
+</pre>
+
+<p>Great, we are passing data to our shader, but we still can't read this data. To do this we need to copy the input buffer to the read buffer and read the read buffer.</p>
 
 <pre class="blocks">
-    buffer read output :: reporter {color1}
+    copy [amount] bytes of data from buffer [srcBuffer] from position [readPos] to buffer [dstBuffer] at position [writePos] :: {color1}
+    Read buffer [buffer] :: reporter {color1}
 </pre>
 
-<p><small>This is because of a quirk with promises. Due to an issue described very soon, this may be changed to one block at some point.</small></p>
+<ul>
+    <p>Copy data block - Copies data between buffers. What did you expect.</p>
+    <li>amount - Number of bytes to copy from srcBuffer to dstBuffer</li>
+    <li>srcBuffer - Buffer to read from. Must have the COPY_SRC usage flag</li>
+    <li>readPos - The position to start reading from</li>
+    <li>dstBuffer - Buffer to write to. Must have COPY_DST usage flag</li>
+    <li>writePos - The position to start writing to</li>
+    <p>Read buffer block - Reads a buffer, as of right now this parses the data as an f32 and returns a stringified array but this may change soon.</p>
+    <li>buffer - The buffer to read, must have MAP_READ usage flag.</li>
+</ul>
 
-<p>Now we can add this to our code:</p>
+<p>Our code using this looks like this:</p>
+<pre class="blocks">
+    Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
+    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
+</pre>
 
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
+<p>Now we're done(see small note below), here's the full code:</p>
+
+<pre class="smallblocks">
+    Def shader [doublingShader] with resources [doublingBGL] :: hat {color1}
     Bind shader resource #[0] to variable [data] with settings (Variable usage (read_write v) next (Variable usage (storage v) next [] :: reporter {color1}) :: reporter {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: reporter {color1}) :: {color1}
     Compute shader with workgroup size [[1\]] {oc}
         For [i] in [0], [2] {oc}
             Variable (In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) (= v) ((In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) * [2.0] :: math) :: {color1}
         {cc} :: {color1}
     {cc} :: {color1}
-
-    when green flag clicked
-    compile shaders :: {color1}
-    Run shader [doublingShader] with resources (bind type (buffer v) to [0], input (F32 array from array [\[1, 2, 3\]] :: reporter {color1}) next (bind type (buffer v) to [0], input ( :: {color3}) next () :: reporter {color1}) :: reporter {color1}) dimensions x: [1] y: [1] z: [1] :: {color1}
-    Copy [12] bytes of data from buffer at binding [0] in shader [doublingShader] from position [0] to buffer at binding [1] in shader [doublingShader] at position [0] :: {color1}
-    Read buffer at binding [1] in shader [doublingShader] :: {color1}
-    set [my variable v] to (buffer read output :: reporter {color1}) :: variables
-</pre>
-
-<p>Now, when you run this you might notice an issue: you need to click it a few times to show up! This is because of how the buffer read block works, and it isn't always instant. You need to add a wait block with a very small value to account for this. <strong>This may be changed in the future!</strong></p>
-
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
-    Bind shader resource #[0] to variable [data] with settings (Variable usage (read_write v) next (Variable usage (storage v) next [] :: reporter {color1}) :: reporter {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: reporter {color1}) :: {color1}
-    Compute shader with workgroup size [[1\]] {oc}
-        For [i] in [0], [2] {oc}
-            Variable (In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) (= v) ((In array [data] get (get variable [i] :: reporter {color1}) :: reporter {color1}) * [2.0] :: math) :: {color1}
-        {cc} :: {color1}
+    
+    when flag clicked
+    Create bind group layout called [doublingBGL] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: color {color1}
+    Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create bind group called [doublingBG] using layout [doublingBGL] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
     {cc} :: {color1}
-
-    when green flag clicked
     compile shaders :: {color1}
-    Run shader [doublingShader] with resources (bind type (buffer v) to [0], input (F32 array from array [\[1, 2, 3\]] :: reporter {color1}) next (bind type (buffer v) to [0], input ( :: {color3}) next () :: reporter {color1}) :: reporter {color1}) dimensions x: [1] y: [1] z: [1] :: {color1}
-    Copy [12] bytes of data from buffer at binding [0] in shader [doublingShader] from position [0] to buffer at binding [1] in shader [doublingShader] at position [0] :: {color1}
-    Read buffer at binding [1] in shader [doublingShader] :: {color1}
-    wait [0.01] seconds :: control
-    set [my variable v] to (buffer read output :: reporter {color1}) :: variables
+    run shader [doublingShader] with bind group [doublingBG] dimensions x: [1] y: [1] z: [1] :: {color1}
+    Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
+    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
 </pre>
+
 
 <p>One last thing! We can make our shader support any length of inputs with the arrayLength built in function(this only works with shader inputs, not declared arrays unfortunately. There is no way to get the length of those :( ). Since the for loop uses an int and arrayLength returns an unsigned int we need to use the i32 builtin function to cast it:</p>
 
-<pre class="vsmallblocks">
-    Def shader [doublingShader] with resources (Def shader resource [inputBuffer] type (buffer v) usage (Buffer usage (STORAGE v), next (Buffer usage (COPY_DST v), next (Buffer usage (COPY_SRC v), next [] :: reporter {color1}) :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (storage v) next (Def shader resource [outputBuffer] type (buffer v) usage (Buffer usage (COPY_DST v), next (Buffer usage (MAP_READ v), next [] :: reporter {color1}) :: reporter {color1}) settings [{"{"}"size":12{"}"}] usage type (NONE v) next () :: reporter {color1}) :: reporter {color1}) :: hat {color1}
+<pre class="smallblocks">
+    Def shader [doublingShader] with resources [doublingBGL] :: hat {color1}
     Bind shader resource #[0] to variable [data] with settings (Variable usage (read_write v) next (Variable usage (storage v) next [] :: reporter {color1}) :: reporter {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: reporter {color1}) :: {color1}
     Compute shader with workgroup size [[1\]] {oc}
         For [i] in [0], (WGSL builtin (i32 v) with args ((WGSL builtin (arrayLength v) with args (Get variable [data] :: reporter {color1}) :: reporter {color1}) - [1] :: math) :: reporter {color1}) {oc}
@@ -406,13 +456,20 @@
         {cc} :: {color1}
     {cc} :: {color1}
 
-    when green flag clicked
+    when flag clicked
+    Create bind group layout called [doublingBGL] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: color {color1}
+    Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create bind group called [doublingBG] using layout [doublingBGL] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
+    {cc} :: {color1}
     compile shaders :: {color1}
-    Run shader [doublingShader] with resources (bind type (buffer v) to [0], input (F32 array from array [\[1, 2, 3\]] :: reporter {color1}) next (bind type (buffer v) to [0], input ( :: {color3}) next () :: reporter {color1}) :: reporter {color1}) dimensions x: [1] y: [1] z: [1] :: {color1}
-    Copy [12] bytes of data from buffer at binding [0] in shader [doublingShader] from position [0] to buffer at binding [1] in shader [doublingShader] at position [0] :: {color1}
-    Read buffer at binding [1] in shader [doublingShader] :: {color1}
-    wait [0.01] seconds :: control
-    set [my variable v] to (buffer read output :: reporter {color1}) :: variables
+    run shader [doublingShader] with bind group [doublingBG] dimensions x: [1] y: [1] z: [1] :: {color1}
+    Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
+    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
 </pre>
 
 <p>And we're done! That was quite a large explanation for so little code. As promised, here's a link to <a href={assets.FinishedBasicsImg} download="FinishedBasicsImg.svg">the image</a>, and in case you're having issues here's <a href={assets.FinishedBasicsProject} download="FinishedBasics.sb3">the sb3</a>. If you have any questions, check the next few pages, otherwise dm derpygamer2142 on discord.</p>
