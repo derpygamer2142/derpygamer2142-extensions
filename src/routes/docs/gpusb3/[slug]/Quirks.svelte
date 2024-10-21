@@ -29,10 +29,6 @@
 <p>GPU.sb3 has some quirks that might make development a bit annoying if you don't know about them. Some of these are obvious, others less so. I'm probably forgetting a lot, so this list may be updated over time.</p>
 
 <Spacer space="50px" />
-<h3>All resources must have a corresponding bind type block</h3>
-<p>Essentially if you don't give it a bind type block it doesn't exist. The binding number doesn't matter if the corresponding resource definition has a usage type of NONE, as it won't get bound.</p>
-
-<Spacer space="50px" />
 <h3>If you use any block not in <a href="/docs/gpusb3/blocks">the blocks list</a> compilation will fail</h3>
 <p>Most scratch blocks are either not usable, unnecessary, or just impossible in WGSL.</p>
 

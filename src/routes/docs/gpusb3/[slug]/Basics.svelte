@@ -47,7 +47,7 @@
     Def shader [Shader name] using bind group layout [Bind group layout] :: hat {color1}
 </pre>
 
-<p>The def shader hat has 2 arguments. The first, the shader name, is how you call and read data from the shader(see <a href="404">run function block</a>). This must only use the text input, you can't add blocks. You can name it whatever you want. Then, there's the <a href="/docs/gpusb3/basics#bindGroupLayout">bind group layout</a>, explained below. You can attach code to the hat, which is what makes up your shader. Be careful, as not all blocks are supported. You can see the list of supported blocks <a href="/docs/gpusb3/blocks">here</a>. Let's make a basic shader that takes in a list and returns the list with every item doubled. We can use the Compute shader C block to define what our shader will do when it is run:</p>
+<p>The def shader hat has 2 arguments. The first, the shader name, is how you run the shader(see the <a href="/docs/gpusb3/blocks#runShader">run shader block</a>). This must only use the text input, you can't add blocks. You can name it whatever you want. Then, there's the <a href="#bindGroupLayout">bind group layout</a> name(doesn't allow inputs), explained later. You can attach code to the hat, which is what makes up your shader. Be careful, as not all blocks are supported. You can see the list of supported blocks <a href="/docs/gpusb3/blocks">here</a>. Let's make a basic shader that takes in a list and returns the list with every item doubled. We can use the Compute shader C block to define what our shader will do when it is run:</p>
 
 <pre class="blocks">
     Compute shader with workgroup size [[1\]] {oc}
@@ -245,8 +245,8 @@
     <li>function - You can only access it from the same function that it is declared? Not too sure.</li>
     <li>private - I assume you can only access this in the same scope it is declared, I have no idea.</li>
     <li>workgroup - This one is pretty cool, it's accessible in each workgroup, regardless of local invocation.</li>
-    <li>uniform - This is used with the <a href="#uniformBufferUsage">uniform usage type in input buffers.</a></li>
-    <li>storage - This is used with the <a href="#storageBufferUsage">storage usage type in input buffers.</a> </li>
+    <li>uniform - This is used with the uniform usage type in a bind group layout entry.</li>
+    <li>storage - This is used with the storage usage type in a bind group layout entry.</li>
 </ul>
 <p>Note: The order of these usage settings does actually matter! Put the usage of how you will access the variable first(for example: storage), followed by the access settings.</p>
 
@@ -285,13 +285,13 @@
     <li>usageFlags - How the buffer will be used. These are individual flags from the Buffer usage block, that you combine using the "usage () | () " block. Here's some more info on that...</li>
     <pre class="blocks">
         Buffer usage (usage v) :: reporter {color1}
-        Usage [] | [] :: reporter {color1}
+        Usage [a] | [b] :: reporter {color1}
     </pre>
     <ul>
         <p>Buffer usage block - This is an individual flag to describe how a buffer will be used. It's possible values are:</p>
-        <li>COPY_SRC - This can be the source buffer in the <a href="404">copy data block</a>.</li>
-        <li>COPY_DST - This can be the destination buffer in the copy data block, and you can write data to it using the <a href="404">write data block</a>.</li>
-        <li>MAP_READ - You can read from this buffer using the <a href="404">read buffer block</a>.</li>
+        <li>COPY_SRC - This can be the source buffer in the <a href="/docs/gpusb3/blocks#copyData">copy data block</a>.</li>
+        <li>COPY_DST - This can be the destination buffer in the copy data block, and you can write data to it using the <a href="/docs/gpusb3/blocks#writeData">write data block</a>.</li>
+        <li>MAP_READ - You can read from this buffer using the <a href="/docs/gpusb3/blocks#readBuffer">read buffer block</a>.</li>
         <li>MAP_WRITE - You can write to this buffer when it's been mapped. Currently unimplemented, so dw about it</li>
         <li>QUERY_RESOLVE - No clue, but I haven't needed to use it anywhere and there's nothing implemented that uses it so dw about this</li>
         <li>STORAGE - This buffer can be written and read from by your shader.</li>
@@ -318,9 +318,9 @@
 </pre>
 
 <ul>
-    <p>Write data - writes data</p>
+    <p>Write data - Writes data</p>
     <li>amount - For a typedArray(currently the only available kind of array), this is in elements. Otherwise in bytes.</li>
-    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="404">f32 array</a>.</li>
+    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="/docs/gpusb3/blocks#f32Array">f32 array</a>.</li>
     <li>bufferName - The buffer to write to.</li>
     <li>off1 - The offset to start reading from, see note in amount.</li>
     <li>off2 - The offset to start writing to, see note in amount.</li>

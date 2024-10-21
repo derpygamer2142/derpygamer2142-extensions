@@ -26,11 +26,11 @@
     const cc = "}"
 </script>
 
-<p>This page contains a list of every block, its inputs, and what it does. You're probably thinking "wow, that probably took a while to write". Well here's the list:</p>
+<p>This page contains a list of every block, its inputs, and what it does. You might be thinking "wow, that probably took a while to write"</p>
 
 
 <pre class="blocks" id="defShader">
-    Def shader [shaderName] with resources [resources] :: hat {color1}
+    Def shader [shaderName] using bind group layout [bindGroupLayout] :: hat {color1}
 </pre>
 
 <p>This creates a new shader with the code underneath the hat, compiled when the <a href="#compileShaders">compile shaders</a> block is run.</p>
@@ -39,57 +39,7 @@
 
 <ul>
     <p>shaderName - The name by which the shader is referenced, for example in the <a href="#runShader">run shader</a> block. <strong>Does not allow inputs.</strong></p>
-    <p>resources - The resources that this shader will use. Takes in an input of <a href="#defShaderResource">def shader resource</a> blocks(or nothing), anything else will cause an error. These are accessible based on the binding defined by the <a href="#bindType">bind type block</a> using  the <a href="#bindShaderResource">bind shader resource</a> block.</p>
-</ul>
-
-<Spacer space="100px" />
-<pre class="blocks" id="defShaderResource">
-    Def shader resource [resourceName] type (resourceType v) usage [resourceUsage] settings [resourceSettings] usage type (resourceUsageType v) next [] :: reporter {color1}
-</pre>
-
-<p>This block defines a shader resource, used in the resources input of the <a href="#defShader">Def shader block</a>.</p>
-
-<h3>Inputs</h3>
-
-<ul>
-    <p>resourceName - The name that you can reference the resource with. I don't think this is actually used anywhere? It might just be internally. <strong>Does not allow inputs.</strong></p>
-    <p>resourceType - What type it is. Currently the only supported type is buffers, but textures may be added in the future. <strong>Does not allow inputs.</strong></p>
-    <p>resourceUsage - Dictates how the resource will be used, such as if you can give it an input array("input" input in the <a href="#bindType">bind type block</a>), whether you can read from it, copy from it, etc. Takes in an input of <a href="#bufferUsage">buffer usage blocks</a>. <strong>Does not allow inputs.</strong></p>
-    <p>resourceSettings - The settings for your resource. If your resource is a buffer, you need to include a size(in bytes. There are 4 bytes in a f32 array) or it will default to 256. <strong>Does not allow inputs</strong>(but it may in the future for convenience)</p>
-    <p>resourceUsageType - How your resource will be used in your shader, if at all. <strong>Does not allow inputs</strong>. Options:</p>
-    <ul>
-        <li>read-only-storage - You can only read from it(I think, haven't tested and the documentation is kinda bad). Goes with the STORAGE option for <a href="#bufferUsage">buffer usage blocks</a>.</li>
-        <li id="storageBufferUsage">storage - You can use this as storage? idk man figure it out. Goes with the STORAGE option for <a href="#bufferUsage">buffer usage blocks</a>.</li>
-        <li id="uniformBufferUsage">uniform - This resource cannot be changed in your shader. Idk about externally, again untested and badly documented. Goes with the UNIFORM option for <a href="#bufferUsage">buffer usage blocks</a>.</li>
-        <li>NONE - This resource will not be used in your shader, and only referenced externally.</li>
-    </ul>
-</ul>
-
-<Spacer space="50px" />
-<pre class="blocks" id="bufferUsage">
-    Buffer usage (usage v) next [] :: reporter {color1}
-</pre >
-    
-<p>This block is used with the <a href="#defShaderResource">def shader resource block</a> to describe how a resource will be used.</p>
-
-<h3>Inputs</h3>
-
-<ul>
-    <p>usage - An individual descriptor of how it will be used. <strong>Does not allow inputs</strong>. Items:</p>
-    <ul>
-        <p>These descriptors will dictate how your resource is used in your project.</p>
-        <li>MAP_READ - Your resource can be read from using the <a href="#readBuffer">read buffer block</a>. The only other valid usage with this type is COPY_DST.</li>
-        <li>MAP_WRITE - This pretty much does nothing in this extension right now, but more features may be added in the future. You should not use this, the only other valid usage with this type is COPY_SRC</li>
-        <li id="copySrc">COPY_SRC - This can be the resource you are copying from using the copy data block. </li>
-        <p><small>Note: this has no restrictions, only MAP_READ restricts the valid combinations! This goes for COPY_DST as well.</small></p>
-        <li id="copyDst">COPY_DST - This can be the resource you are copying data to in the <a href="#copyData">copy data block</a>. You need this usage to be able to use an input array in the <a href="#bindType">bind type block</a>!</li>
-        
-        <Spacer space="25px" />
-        <p id="resourceShaderUsage">These descriptors will dictate how your resource is used in your <i>shader</i>.</p>
-    
-        <li>UNIFORM - This is an input resource that will not and cannot be modified in your shader. Used with the uniform usage type.</li>
-        <li>STORAGE - This resource can be used to store changing data. Used with the storage and read_only_storage usage types.</li>
-    </ul>
+    <p>bindGroupLayout - The bind group layout that this shader will use, references a <a href="#bindGroupLayout">bind group layout definition</a></p>
 </ul>
 
 <Spacer space="50px" />
@@ -101,7 +51,7 @@
 
 <Spacer space="50px" />
 <pre class="blocks" id="runShader">
-    Run shader [shaderName] with resources [shaderResources] dimensions x: [dimX] y: [dimY] z: [dimZ] :: {color1}
+    Run shader [shaderName] with using bind group [bindGroup] dimensions x: [dimX] y: [dimY] z: [dimZ] :: {color1}
 </pre>
 
 <p>This block will run whatever is in the <a href="#computeShader">compute function</a> of your shader.</p>
@@ -110,25 +60,148 @@
 
 <ul>
     <p>shaderName - The name of the shader to run. <strong>Allows inputs.</strong></p>
-    <p>shaderResources - The resources to use when running the shader. Takes in an input of <a href="#bindType">bind type blocks</a>.</p>
+    <p>bindGroup - The bind group to use to provide resources to your shader. Takes a name which references a <a href="#bindGroup">bind group definition</a>.</p>
     <p>dimX, dimY, dimZ - The number of workgroups to dispatch per axis. This gets passed to the compute shader as a vector, you can reference it with num_workgroups. Your compute shader is run once for each location in these dimensions. <strong>Allows inputs.</strong></p>
 </ul>
 
-
 <Spacer space="50px" />
-<pre class="blocks" id="bindType">
-    Bind type (resourceType v) to [bindingNumber] input [resourceInput] next [] :: reporter {color1}
+<pre class="blocks" id="bindGroupLayout">
+    Create bind group layout called [bindGroupLayoutName] {oc}
+        Entries... :: {color2}
+    {cc} :: color {color1}
 </pre>
 
-<p>This blocks will provide inputs and initialize the resources defined in the <a href="#defShaderResource">def shader resource blocks</a>.</p>
+<p>Creates a bind group layout.</p>
 
 <h3>Inputs</h3>
 
 <ul>
-    <p>resourceType - The kind of resource to bind to the input. Currently only supports buffers. <strong>Does not allow inputs.</strong></p>
-    <p>bindingNumber - The binding number which you use to reference the resource, for example in the <a href="#bindShaderResource">bind shader resource block</a>. <strong>Allows inputs.</strong></p>
-    <p>resourceInput - If the resource has the <a href="#copyDst">COPY_DST usage</a> you can provide an input using one of the corresponding data input blocks. Currently only supports the <a href="#f32Array">F32 array block.</a></p>
-    <p></p>
+    <p>bindGroupLayoutName - The name that will be used to reference the bind group layout</p>
+    <p>entries - Put <a href="#bindGroupLayoutEntry">bind group layout entry blocks</a> here to define the layout.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks" id="bindGroupLayoutEntry">
+    Add bind group layout entry with binding [bindingNumber] for type (bindingType v) and descriptor [bindGroupLayoutEntryDescriptor] :: {color1}
+</pre>
+
+<p>Adds an entry to the bind group layout definition the block is inside of.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <li>bindingNumber - The binding number you are describing. A binding number is a slot in the list of possible inputs you can give your shader.</li>
+    <li>bindingType - The type of resource you are going to put in this slot. Here's the possible values for this:</li>
+    <ul>
+        <li>buffer - Essentially just a list, but instead of items it sometimes has individual bytes. A buffer can only have numbers in it.</li>
+    </ul>
+    <li>bindGroupLayoutEntryDescriptor - Fancy name, fairly simple input. Takes an input of an <a href="#bindGroup">entry descriptor block</a>. This input describes how this slot will be used, and the type of descriptor depends on the bindingType.</li>
+</ul>
+
+<Spacer space="50px" />
+<h3>Entry descriptor blocks</h3>
+<p>An entry descriptor block describes a bind group layout entry, which block to use depends on the bindingType of the entry.</p>
+
+<pre class="blocks">
+    Buffer layout entry descriptor with usage type (usageType v) :: {color1} reporter
+</pre>
+<ul>
+    <p>Usage type - How this buffer will be used. Possible values: </p>
+    <ul>
+        <li>read-only-storage is for a buffer that will only be read from</li>
+        <li>storage is for a buffer that will be written to and possibly read from</li>
+        <li>uniform is essentially read-only-storage except it's optimized for buffers that won't change much(or at all)</li>
+    </ul>
+</ul>
+
+<Spacer space="100px" />
+
+<pre class="blocks" id="bindGroup">
+    Create bind group called [bindGroupName] using layout [bindGroupLayoutName] {oc}
+        Entries... :: {color2}
+    {cc} :: {color1}
+</pre>
+
+<p>Creates a bind group, which binds various resources to binding slots. Similar to the create bind group layout block where you put the entries inside of it.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>bindGroupName - The name by which this bind group will be referenced</p>
+    <p>bindGroupLayoutName - The name of a <a href="#bindGroupLayout">bind group layout definition</a> to describe this bind group.</p>
+    <p>entries - Put <a href="#bindGroupEntry">bind group entry blocks</a> here</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks" id="bindGroupEntry">
+    Add bind group entry with binding [bindingNumber] of type (bindingType v) using resource named [resourceName] :: {color1}
+</pre>
+
+<p>Binds a given resource to a binding slot in the bind group this block is inside of.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>bindingNumber - The slot to bind the resource to</p>
+    <p>bindingType - The type of resource to bind here. Valid types:</p>
+    <ul>
+        <li>buffer</li>
+    </ul>
+    <p>resourceName - The name of the resource, corresponds to a <a href="#resourceDefinitions">resource definition</a> of the previously specified type.</p>
+</ul>
+
+<Spacer space="50px" />
+
+<h3 id="resourceDefinitions">Resource definitions</h3>
+<pre class="blocks">
+    Create buffer called [bufferName] with size\(in bytes\) [size] and usage flags [usageFlags] :: {color1}
+</pre>
+
+<p>Creates a buffer.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>bufferName - The name by which this buffer will be referenced.</p>
+    <p>size - The size of the buffer, in bytes.</p>
+    <p>usageFlags - Flags using the <a href="#bufferUsage">buffer usage block</a> which describe how the buffer can be used.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks" id="bufferUsage">
+    Buffer usage (usage v) :: reporter {color1}
+</pre>
+
+<p>This block is an individual flag for how a buffer can be used, and multiple can be strung together using the <a href="#usageOr">usage |</a> block.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>usage - This block's flag. Possible values:</p>
+    <ul>
+        <li>COPY_SRC - This can be the source buffer in the <a href="#copyData">copy data block</a>.</li>
+        <li>COPY_DST - This can be the destination buffer in the copy data block, and you can write data to it using the <a href="#writeData">write data block</a>.</li>
+        <li>MAP_READ - You can read from this buffer using the <a href="#readBuffer">read buffer block</a>.</li>
+        <li>MAP_WRITE - You can write to this buffer when it's been mapped. Currently unimplemented, so dw about it</li>
+        <li>QUERY_RESOLVE - No clue, but I haven't needed to use it anywhere and there's nothing implemented that uses it so dw about this</li>
+        <li>STORAGE - This buffer can be written and read from by your shader.</li>
+        <li>UNIFORM - This buffer will only be read from by your shader.</li>
+    </ul>
+</ul>
+
+<Spacer space="25px" />
+
+<pre class="blocks">
+    Usage [a] | [b] :: reporter {color1}
+</pre>
+
+<p>This just lets you string together usage flags. Put a flag or another usage block in the inputs. This is equivilant to a binary OR operator.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>a - An individual usage flag or another of this block.</p>
+    <p>b - An individual usage flag or another of this block.</p>
 </ul>
 
 <Spacer space="50px" />
@@ -136,7 +209,7 @@
     F32 array from array [array] :: reporter {color1}
 </pre>
 
-<p>Creates a typed array from the inputs provided. Returns a reference, not the array!</p>
+<p>Creates a typed f32 array from the inputs provided. Returns a reference, not the array!</p>
 
 <h3>Inputs</h3>
 
@@ -144,9 +217,25 @@
     <p>array - An array of numbers. You can use the json extension as an input here.</p>
 </ul>
 
+<pre class="blocks" id="writeData">
+    Write [amount] elements of data from array [array] to buffer [bufferName] from offset [off1] to offset [off2] :: {color1}
+</pre>
+
+<p>This writes data from a typed array or some other data source(currently unimplemented) to a buffer.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <li>amount - For a typed array(currently the only available kind of array), this is in elements(aka list items). Otherwise in bytes.</li>
+    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="#f32Array">f32 array</a>.</li>
+    <li>bufferName - The buffer to write to.</li>
+    <li>off1 - The offset to start reading from, see note in amount.</li>
+    <li>off2 - The offset to start writing to, see note in amount.</li>
+</ul>
+
 <Spacer space="50px" />
 <pre class="blocks" id="copyData">
-    Copy [numBytes] bytes of data from buffer at binding [binding1] in shader [shader1] from position [pos1] to buffer at binding [binding2] in shader [shader2] at position [pos2] :: {color1}
+    Copy [numBytes] bytes of data from buffer [srcBuffer] from position [pos1] to buffer [dstBuffer] at position [pos2] :: {color1}
 </pre>
 
 <p>Allows you to copy data from one buffer to another. The first buffer must have a usage of <a href="#copySrc">COPY_SRC</a>, the second buffer must have a usage of <a href="#copyDst">COPY_DST</a>.</p>
@@ -155,34 +244,25 @@
 
 <ul>
     <p>numBytes - The amount of bytes to copy from the first buffer to the second. Must be a multiple of 4. <strong>Allows inputs.</strong></p>
-    <p>binding1 - The buffer's binding in shader1, defined in the bindingNumber input of the corresponding <a href="#bindType">bind type block</a>. <strong>Allows inputs.</strong></p>
-    <p>shader1 - The shader that the first buffer is defined in. Corresponds to the shaderName input of the corresponding <a href="#defShader">def shader block</a>. <strong>Allows inputs.</strong></p>
+    <p>srcBuffer - The buffer to copy data from. Must have a usage flag of COPY_SRC.</p>
     <p>pos1 - The index at which to start copying data. Must be a multiple of 4. <strong>Allows inputs.</strong></p>
-    <p>binding2 - The buffer's binding in shader2, defined in the bindingNumber input of the corresponding <a href="#bindType">bind type block</a>. <strong>Allows inputs.</strong></p>
-    <p>shader2 - The shader that the second buffer is defined in. Corresponds to the shaderName input of the corresponding <a href="#defShader">def shader block</a>. <strong>Allows inputs.</strong></p>
+    <p>dstBuffer - The buffer to copy data to. Must have a usage flag of COPY_DST</p>
     <p>pos2 - The index at which to start pasting data. Must be a multiple of 4. <strong>Allows inputs.</strong></p>
 </ul>
 
 <Spacer space="50px" />
 <pre class="blocks" id="readBuffer">
-    Read buffer at binding [binding] in shader [shaderName] :: {color1}
+    Read buffer [buffer] :: reporter {color1}
 </pre>
 
-<p>Writes the contents of the buffer to the <a href="#bufferReadOutput">buffer read output block</a>.</p>
+<p>Returns the specified buffer parsed as an f32 array. Expect this to change soon!</p>
+<p><strong>Note: This has a 1 frame delay when reading, which can't really be avoided.</strong></p>
 
 <h3>Inputs</h3>
 
 <ul>
-    <p>binding - The buffer's binding in shaderName, defined in the bindingNumber input of the corresponding <a href="#bindType">bind type block</a>. <strong>Allows inputs.</strong></p>
-    <p>shaderName - The shader that the buffer is defined in. Corresponds to the shaderName input of the corresponding <a href="#defShader">def shader block</a>. <strong>Allows inputs.</strong></p>
+    <p>buffer - The buffer to read. Must have a usage flag of MAP_READ.</p>
 </ul>
-
-<Spacer space="50px" />
-<pre class="blocks" id="bufferReadOutput">
-    Buffer read output :: reporter {color1}
-</pre>
-
-<p>Returns the output from the <a href="#readBuffer">read buffer block</a>. <strong>May be changed to one block at some point.</strong></p>
 
 <Spacer space="50px" />
 <pre class="blocks" id="declareVar">
@@ -286,16 +366,16 @@
 
 <Spacer space="50px" />
 <pre class="blocks" id="getArray">
-    In array [arrayName] get [index] :: reporter {color1}
+    In object [objectName] get index [index] :: reporter {color1}
 </pre>
 
-<p>Gets an index in an array</p>
+<p>Gets an index in an object, usually an array</p>
 
 <h3>Inputs</h3>
 
 <ul>
-    <p>arrayName - The name of an array variable, or an array input. <strong>Allows inputs.</strong></p>
-    <p>index - The index you want to get from the array. <strong>Allows inputs.</strong></p>
+    <p>objectName - The name of an object variable, or an object input. <strong>Allows inputs.</strong></p>
+    <p>index - The index you want to get from the object. <strong>Allows inputs.</strong></p>
     <p></p>
 </ul>
 
