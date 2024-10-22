@@ -49,6 +49,34 @@
 
 <p>Compiles all of the shaders in your project. This can be pretty slow depending on the number and length of your shaders, so you should probably only run this whenever you update your shaders or the first time your project is run.</p>
 
+<Spacer space="30px" />
+<pre class="blocks">
+    when error thrown :: hat {color1}
+</pre>
+
+<p>This hat is run whenever an error is thrown. More info at the <a href="/docs/gpusb3/errors">errors page</a>.</p>
+
+<Spacer space="30px" />
+<pre class="blocks">
+    clear current error :: {color1}
+</pre>
+
+<p>Resets the <a href="#error">error reporter</a> to the default of {oc} {cc}</p>
+
+<Spacer space="30px" />
+<pre class="blocks">
+    Error :: reporter {color1}
+</pre>
+
+<p>This reports the current error when an error is thrown, in the format:
+    {JSON.stringify({
+        name: "errorName",
+        body: "errorBody",
+        source: "errorSource",
+        full: "fullError"
+    })}
+</p>
+
 <Spacer space="50px" />
 <pre class="blocks" id="runShader">
     Run shader [shaderName] with using bind group [bindGroup] dimensions x: [dimX] y: [dimY] z: [dimZ] :: {color1}
@@ -318,7 +346,7 @@
 <h3>Inputs</h3>
 
 <ul>
-    <p>usage - The individual descriptor. <strong>Does not allow inputs.</strong> Values:</p>
+    <p>usage - The individual descriptor. <strong>Allows inputs.</strong> Values:</p>
     <ul>
         <p>These settings describe how you can access the variable:</p>
         <li>read - You can read from this variable</li>
