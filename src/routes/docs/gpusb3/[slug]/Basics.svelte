@@ -134,8 +134,7 @@
 </pre>
 
 <p><small>Ideally you should only compile your shaders when you make changes, or when your project is run for the first time as it can be pretty slow depending on the number and length of your shaders. We are doing it when the flag is clicked here for simplicity.</small></p>
-<!-- todo: errors here -->
-<p>Now when you press the flag your shader will be compiled! Check the console using f12(or whatever button it is on your browser) and look for any errors or warnings. If you see something along the lines of "invalid input", it means you put a block where a block isn't allowed to go. If you see something like "invalid opcode", it means you used an unsupported block in your shader. If you see any other errors, dm derpygamer2142 on discord. Now we can finally run our shader! This is done using the run shader block:</p>
+<p>Now when you press the flag your shader will be compiled! Check the "Error" block and look for any errors or warnings. If you see something along the lines of "invalid input", it means you put a block where a block isn't allowed to go. If you see something like "invalid opcode", it means you used an unsupported block in your shader. If you see any other errors, dm derpygamer2142 on discord. Now we can finally run our shader! This is done using the run shader block:</p>
 
 <pre class="blocks">
     Run shader [shader name] using bind group [bind group name] dimensions x: [x dim] y: [y dim] z: [z dim] :: {color1}

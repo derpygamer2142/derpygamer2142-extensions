@@ -77,6 +77,20 @@
     })}
 </p>
 
+<ul>
+    <p>name - The name of the error thrown, this doesn't contain spaces(unless it's a webgpu error, which might)</p>
+    <p>body - A short description of the error</p>
+    <p>source - The block or process that caused this error</p>
+    <p>full - The full error, along with what may have caused it</p>
+</ul>
+
+<Spacer space="30px" />
+<pre class="blocks">
+    Reconnect to GPU :: {color1}
+</pre>
+
+<p>If you somehow lose connection to the webgpu adapter(whether that be by accidentally making a permenant loop or something else), you can use this block to reconnect and continue using it. You will need to recreate all buffers, bind groups, etc.</p>
+
 <Spacer space="50px" />
 <pre class="blocks" id="runShader">
     Run shader [shaderName] with using bind group [bindGroup] dimensions x: [dimX] y: [dimY] z: [dimZ] :: {color1}
