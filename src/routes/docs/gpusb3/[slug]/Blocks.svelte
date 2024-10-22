@@ -472,6 +472,20 @@
 </ul>
 
 <Spacer space="50px" />
+<pre class="blocks">
+    Matrix type with [columns] columns and [rows] rows :: reporter {color1}
+</pre>
+
+<p>Creates a matrix type with the specified dimensions. If you don't know what a matrix is, idk google it or something man, how did you get this far in the first place</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>columns - The number of columns in the matrix, must be at least 2 and no more than 4</p>
+    <p>rows - The number of rows in the matrix, must be at least 2 and no more than 4</p>
+</ul>
+
+<Spacer space="50px" />
 <pre class="blocks" id="baseType">
     Base type (type v) :: reporter {color1}
 </pre>
@@ -667,6 +681,20 @@
 <ul>
     <p>funcName - The name of the function to run. <strong>Does not allow inputs.</strong></p>
     <p>args - The arguments to pass to the function. Accepts an input of <a href="#functionArgInput">function arg input blocks</a>, or comma seperated values in the text input.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Arbitrary WGSL [code] :: {color1}
+    Arbitrary WGSL [code] :: reporter {color1}
+</pre>
+
+<p>This block allows you to add arbitrary WGSL to your shaders. If you feel like doing this, check the <a href="/docs/gpusb3/resources">resources page</a>.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>code - The code to add to your shader. This doesn't do semicolons for you.</p>
 </ul>
 
 <Spacer space="50px" />

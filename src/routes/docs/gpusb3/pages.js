@@ -3,5 +3,6 @@ export const pages = [
     "errors",
     "blocks",
     "quirks",
+    "internals",
     "resources" // note to self: this page will be last
 ]

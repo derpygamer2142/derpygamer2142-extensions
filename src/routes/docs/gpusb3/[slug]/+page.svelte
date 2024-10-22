@@ -4,6 +4,7 @@
     import Quirks from "./Quirks.svelte"
     import Resources from "./Resources.svelte"
     import Errors from "./Errors.svelte"
+    import Internals from "./Internals.svelte"
     import Spacer from "$lib/Spacer.svelte"
     import { goto } from "$app/navigation"
     import { onMount } from "svelte"
@@ -32,6 +33,8 @@
     <Resources />
 {:else if p === "errors"}
     <Errors />
+{:else if p === "internals"}
+    <Internals />
 {/if}
 
 <Spacer space="100px" />
