@@ -1,6 +1,7 @@
 export const pages = [
     "basics",
     "errors",
+    "advanced",
     "blocks",
     "quirks",
     "internals",

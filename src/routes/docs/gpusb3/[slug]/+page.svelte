@@ -1,5 +1,6 @@
 <script>
     import Basics from "./Basics.svelte"
+    import Advanced from "./Advanced.svelte"
     import Blocks from "./Blocks.svelte"
     import Quirks from "./Quirks.svelte"
     import Resources from "./Resources.svelte"
@@ -35,6 +36,8 @@
     <Errors />
 {:else if p === "internals"}
     <Internals />
+{:else if p === "advanced"}
+    <Advanced />
 {/if}
 
 <Spacer space="100px" />

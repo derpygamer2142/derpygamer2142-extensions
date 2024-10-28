@@ -685,6 +685,31 @@
 
 <Spacer space="50px" />
 <pre class="blocks">
+    Create atomic of type (type v) :: reporter {color1}
+</pre>
+
+<p>Creates an atomic type, which can be put in the type input of the declare variable block. Atomic variables allow you to read and write to a variable without introducing a race condition, see <a href="/docs/gpusb3/advanced">advanced</a>.</p>
+
+<ul>
+    <p>type - Either an i32 or u32. The type of variable this atomic will be.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Load atomic [atomic] :: reporter {color1}
+</pre>
+
+<p>Reads an atomic variable in a thread safe way.</p>
+
+<ul>
+    <p>atomic - A <a href="#pointer">pointer</a> to an atomic variable.</p>
+</ul>
+
+<Spacer space="50px" />
+
+
+<Spacer space="50px" />
+<pre class="blocks">
     Arbitrary WGSL [code] :: {color1}
     Arbitrary WGSL [code] :: reporter {color1}
 </pre>
@@ -749,4 +774,4 @@
 
 <Spacer space="100px" />
 <p>Wow, that's a lot of blocks.</p>
-<h2>If you see something incorrect, missing, or you have any questions DM derpygamer2142 on discord.</h2>
+<h2>If you see something incorrect, missing, or you have any questions DM derpygamer2142 on discord.</h2> -->
