@@ -232,6 +232,41 @@
 </ul>
 
 <Spacer space="25px" />
+<pre class="blocks">
+    Create texture called [texture] with dimensions [width] [height], color format (colorFormat v) and usage [usage] :: {color1}
+</pre>
+
+<p>This is similar to the create buffer block, except it creates a texture. Shocking, I know.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>texture - The name of the texture to create</p>
+    <p>width/height - The size of the texture, in pixels</p>
+    <p>colorFormat - The number of channels and bits per channel. There's a lot, see <a href="https://www.w3.org/TR/webgpu/#enumdef-gputextureformat">the webgpu spec</a>.</p>
+    <p>usage - Similar to the usage input for the create buffer block, this takes in usage flags. See <a href="#textureUsage">the texture usage block</a>.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks" id="bufferUsage">
+    Texture usage (usage v) :: reporter {color1}
+</pre>
+
+<p>This block is an individual flag for how a texture can be used, and multiple can be strung together using the <a href="#usageOr">usage |</a> block.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>usage - This block's flag. Possible values:</p>
+    <ul>
+        <li>COPY_SRC - This can be the source texture in the <a href="#copyTextureToBuffer">copy texture to buffer block</a>.</li>
+        <li>COPY_DST - This can be the destination texture in the <a href="#writeTexture">write texture data block</a>.</li>
+        <li>TEXTURE_BINDING - I don't think this is usable in compute shaders, but it's here just in case.</li>
+        <li>STORAGE_BINDING - This lets you bind this texture in a bind group.</li>
+    </ul>
+</ul>
+
+<Spacer space="25px" />
 
 <pre class="blocks">
     Usage [a] | [b] :: reporter {color1}
@@ -247,29 +282,32 @@
 </ul>
 
 <Spacer space="50px" />
-<pre class="blocks" id="f32Array">
-    F32 array from array [array] :: reporter {color1}
+<pre class="blocks">
+    Copy texture [texture] to buffer [buffer] with dimensions [width] [height] :: {color1}
 </pre>
 
-<p>Creates a typed f32 array from the inputs provided. Returns a reference, not the array!</p>
+<p>This copies data from a texture to a buffer.</p>
 
 <h3>Inputs</h3>
 
 <ul>
-    <p>array - An array of numbers. You can use the json extension as an input here.</p>
+    <p>texture - The texture to copy data from. Must have a flag of COPY_SRC.</p>
+    <p>buffer - The buffer to copy data to. Must have a flag of COPY_DST</p>
+    <p>width/height - The dimensions to copy, in pixels(I think, idrk)</p>
 </ul>
 
+<Spacer space="50px" />
 <pre class="blocks" id="writeData">
     Write [amount] elements of data from array [array] to buffer [bufferName] from offset [off1] to offset [off2] :: {color1}
 </pre>
 
-<p>This writes data from a typed array or some other data source(currently unimplemented) to a buffer.</p>
+<p>This writes data from an arraybuffer to a buffer.</p>
 
 <h3>Inputs</h3>
 
 <ul>
     <li>amount - For a typed array(currently the only available kind of array), this is in elements(aka list items). Otherwise in bytes.</li>
-    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="#f32Array">f32 array</a>.</li>
+    <li>array - The name of the arrayBuffer to get the data from.</li>
     <li>bufferName - The buffer to write to.</li>
     <li>off1 - The offset to start reading from, see note in amount.</li>
     <li>off2 - The offset to start writing to, see note in amount.</li>
@@ -294,16 +332,31 @@
 
 <Spacer space="50px" />
 <pre class="blocks" id="readBuffer">
-    Read buffer [buffer] :: reporter {color1}
+    Read buffer [buffer] to arraybuffer [arrayBuffer]:: {color1}
 </pre>
 
-<p>Returns the specified buffer parsed as an f32 array. Expect this to change soon!</p>
-<p><strong>Note: This has a 1 frame delay when reading, which can't really be avoided.</strong></p>
+<p>Gets the data from the specified buffer, and copies it to a new arrayBuffer.</p>
+<p><strong>Note: This has a 1 frame delay when reading, which can't really be avoided. If I'm feeling silly in the future I might add a second block for this..</strong></p>
 
 <h3>Inputs</h3>
 
 <ul>
     <p>buffer - The buffer to read. Must have a usage flag of MAP_READ.</p>
+    <p>arrayBuffer - The arraybuffer to write to. Will be created if it doesn't already exist.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Write texture data from (costume v) to texture [texture] :: {color1}
+</pre>
+
+<p>This writes texture data from a costume to a texture.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>costume - The costume to get the data from.</p>
+    <p>texture - The texture to write the data to. Must have a flag of COPY_DST.</p>
 </ul>
 
 <Spacer space="50px" />

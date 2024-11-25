@@ -33,6 +33,9 @@
 
 <h3>This page is about advanced topics. If you haven't read <a href="/docs/gpusb3/basics">the basics</a> this won't make sense.</h3>
 
+<h1>Unfinished page!</h1>
+<p>This page is unfinished, it may contain inaccurate, wrong, or invalid information/code.</p>
+
 <p>Topics covered here:</p>
 
 <ul>
@@ -77,8 +80,8 @@
 
 <pre class="blocks">
     Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
-        Add bind group entry with binding [0] of type [buffer v] using resource named [input] :: {color1}
-        Add bind group entry with binding [1] of type [buffer v] using resource named [work] :: {color1}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [input] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [work] :: {color1}
     {cc} :: {color1}
 </pre>
 
@@ -88,15 +91,15 @@
 <pre class="blocks">
     Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
     Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
-    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v), length\(array only!\) [] :: {color1}) :: {color1}) :: {color1}
 </pre>
 
 <p>Now, atomic variables need to be declared in <strong>uniform</strong> control flow. This means it can't be inside of any functions, if statements or anything. We'll declare our i32 atomic, which we will use to store the sum of the values.</p>
 
 <pre class="blocks">
     Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
-    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
-    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v), length\(array only!\) [] :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
     Declare variable (Variable usage (workgroup v) next [] :: {color1}) variable as [sum] with value []: (Create atomic of type (i32 v) :: {color1}) :: {color1}
     Compute shader with workgroup size [\[1\]] {oc}
 
@@ -118,11 +121,10 @@
 
 <p>That's cool and all, but first we need to go over how to use atomic variables. Atomics have built in functions to perform operations in a thread safe way. If you try to set the variable without using these functions, you're defeating the whole purpose of atomics.</p>
 
-<pre>
+<pre class="blocks">
     Load atomic [atomic] :: reporter {color1}
     Perform operation (atomicOp v) on atomic [atomic] with value [value] :: {color1}
     Perform operation (atomicOp v) on atomic [atomic] with value [value] :: reporter {color1}
-
 </pre>
 
 <ul>
@@ -143,11 +145,11 @@
 
 <pre class="blocks">
     Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
-    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
-    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
     Declare variable (Variable usage (workgroup v) next [] :: {color1}) variable as [sum] with value []: (Create atomic of type (i32 v) :: {color1}) :: {color1}
     Compute shader with workgroup size [\[1\]] {oc}
-        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) :: {color1}
+        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) with value [0] :: {color1}
         Barrier (workgroupBarrier v) :: {color1}
     {cc} :: {color1}
 </pre>
@@ -156,13 +158,13 @@
 
 <pre class="blocks">
     Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
-    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
-    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
     Declare variable (Variable usage (workgroup v) next [] :: {color1}) variable as [sum] with value []: (Create atomic of type (i32 v) :: {color1}) :: {color1}
     Compute shader with workgroup size [\[1\]] {oc}
-        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) :: {color1}
+        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) with value [0] :: {color1}
         Barrier (workgroupBarrier v) :: {color1}
-        Perform operation (atomicAdd v) on atomic (Pointer to variable [sum] :: {color1}) with value (WGSL builtin [i32] with args (In object [input] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+        Perform operation (atomicAdd v) on atomic (Pointer to variable [sum] :: {color1}) with value (WGSL builtin (i32 v) with args (In object [input] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) :: {color1}) :: {color1}
     {cc} :: {color1}
 </pre>
 
@@ -170,17 +172,16 @@
 
 <pre class="msmallblocks">
     Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
-    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
-    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}) :: {color1}) :: {color1}
+    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
     Declare variable (Variable usage (workgroup v) next [] :: {color1}) variable as [sum] with value []: (Create atomic of type (i32 v) :: {color1}) :: {color1}
     Compute shader with workgroup size [\[1\]] {oc}
-        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) :: {color1}
+        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) with value [0] :: {color1}
         Barrier (workgroupBarrier v) :: {color1}
-        Perform operation (atomicAdd v) on atomic (Pointer to variable [sum] :: {color1}) with value (WGSL builtin [i32] with args (In object [input] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+        Perform operation (atomicAdd v) on atomic (Pointer to variable [sum] :: {color1}) with value (WGSL builtin (i32 v) with args (In object [input] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) :: {color1}) :: {color1}
         Barrier (storageBarrier v) :: {color1}
         Variable (In object [output] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) (= v) (  (WGSL builtin (f32 v) with args (Load atomic (Pointer to variable [sum] :: {color1}) :: {color1}) :: {color1}) / (( WGSL builtin (f32 v) with args (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) + [1.0])  ) :: {color1}
     {cc} :: {color1}
 </pre>
 
-<p>That's our shader finished. Not to self: finish this</p> -->
-<!-- todo: this will change soon -->
+<p>That's our shader finished. Note to self: finish</p>

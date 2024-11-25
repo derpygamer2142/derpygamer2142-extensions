@@ -55,7 +55,7 @@
     {cc} :: {color1}
 </pre>
 
-<p><small>Don't worry about workgroup size quite yet. It's explained <a href="404">here</a></small></p>
+<p><small>Don't worry about workgroup size quite yet. It's explained <a href="404">here(sorry, i still need to explain this!)</a></small></p>
 
 <p>Let's define an array in our compute shader, named "data". First we need to make the type so we can construct it. We will have an array of 3 floats, which in blocks looks like this:</p>
 
@@ -312,26 +312,29 @@
 <Spacer space="15px" />
 <p>To actually write the data to inputBuffer, we can use the writeData block.</p>
 <pre class="blocks">
-    Write [amount] elements of data from array [array] to buffer [bufferName] from offset [off1] to offset [off2] :: {color1}
-    F32 array from array [array] :: reporter {color1}
+    Write [amount] elements of data from arraybuffer [array] to buffer [bufferName] from offset [off1] to offset [off2] :: {color1}
+
+    Create arraybuffer and view called [name] from array [data] of type (dataType v) :: {color1}
 </pre>
 
 <ul>
     <p>Write data - Writes data</p>
     <li>amount - For a typedArray(currently the only available kind of array), this is in elements. Otherwise in bytes.</li>
-    <li>array - The array of data to write to the buffer. Currently the only available kind is the <a href="/docs/gpusb3/blocks#f32Array">f32 array</a>.</li>
+    <li>array - The arraybuffer to take the data from.</li>
     <li>bufferName - The buffer to write to.</li>
     <li>off1 - The offset to start reading from, see note in amount.</li>
     <li>off2 - The offset to start writing to, see note in amount.</li>
-    <p>f32 array - returns an array of data(technically a reference to one)</p>
-    <li>array - A stringified list. You can make this using the json extension.</li>
+    <p>Create arraybuffer - this adds a new arraybuffer and arraybuffer view from the given array. See <a href="404">arraybuffers page</a>.</p>
+    <li>name - The name to use when creating the objects.</li>
+    <li>data - A stringified array of <b>numbers</b>. You can make this using a json extension.</li>
+    <li>dataType - A typedArray type. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#typedarray_objects">the mdn reference</a>.</li>
 </ul>
 
 <p>Since we're using float32s, and there's 4 bytes in 32 bits, and we are using a buffer length of 12 bytes, our array will have a length of 3. Here's what our writing code looks like:</p>
 
 <pre class="blocks">
-    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
-    
+    Create arraybuffer and view called [inputArrayBuffer] from array [\[1, 2, 3\]] of type (Float32Array v) :: {color1}
+    Write [3] elements of data from arraybuffer [inputArrayBuffer] to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
 </pre>
 
 <p>Adding all of that to our existing code and we have</p>
@@ -343,7 +346,8 @@
     {cc} :: color {color1}
     Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
     Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
-    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create arraybuffer and view called [inputArrayBuffer] from array [\[1, 2, 3\]] of type (Float32Array v) :: {color1}
+    Write [3] elements of data from arraybuffer [inputArrayBuffer] to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
     compile shaders :: {color1}
     run shader [doublingShader] with bind group [] dimensions x: [1] y: [1] z: [1] :: {color1}
 </pre>
@@ -384,7 +388,8 @@
     {cc} :: color {color1}
     Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
     Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
-    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create arraybuffer and view called [inputArrayBuffer] from array [\[1, 2, 3\]] of type (Float32Array v) :: {color1}
+    Write [3] elements of data from arraybuffer [inputArrayBuffer] to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
     Create bind group called [doublingBG] using layout [doublingBGL] {oc}
         Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
     {cc} :: {color1}
@@ -396,7 +401,12 @@
 
 <pre class="blocks">
     copy [amount] bytes of data from buffer [srcBuffer] from position [readPos] to buffer [dstBuffer] at position [writePos] :: {color1}
-    Read buffer [buffer] :: reporter {color1}
+
+    Read buffer [buffer] to arraybuffer [arrayBuffer] :: {color1}
+
+    View arraybuffer (arrayBuffer v) as (arrayType v) called [viewName] :: {color1}
+
+    Get view [view] as array :: reporter {color1}
 </pre>
 
 <ul>
@@ -406,14 +416,22 @@
     <li>readPos - The position to start reading from</li>
     <li>dstBuffer - Buffer to write to. Must have COPY_DST usage flag</li>
     <li>writePos - The position to start writing to</li>
-    <p>Read buffer block - Reads a buffer, as of right now this parses the data as an f32 and returns a stringified array but this may change soon.</p>
+    <p>Read buffer block - This copies the data from the buffer to the specifed arrayBuffer.</p>
     <li>buffer - The buffer to read, must have MAP_READ usage flag.</li>
+    <li>arrayBuffer - The arraybuffer to write the data to</li>
+    <p>View arraybuffer block - This creates a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">view</a> of an arraybuffer of the given type.</p>
+    <li>arrayBuffer - The arraybuffer to view.</li>
+    <li>arrayType - See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#typedarray_objects">the mdn reference</a>. The type of typedArray to create.</li>
+    <li>viewName - The name of the view to create</li>
+    <p>Get view block - This reads a given view as its given type, returned as a stringified array.</p>
 </ul>
 
 <p>Our code using this looks like this:</p>
 <pre class="blocks">
     Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
-    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
+    Read buffer [readBuffer] to arraybuffer [outputArrayBuffer] :: {color1}
+    View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
+    set [my variable v] to (Get view [outputView] as array :: {color1})
 </pre>
 
 <p>Now we're done(see small note below), here's the full code:</p>
@@ -433,14 +451,17 @@
     {cc} :: color {color1}
     Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
     Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
-    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create arraybuffer and view called [inputArrayBuffer] from array [\[1, 2, 3\]] of type (Float32Array v) :: {color1}
+    Write [3] elements of data from arraybuffer [inputArrayBuffer] to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
     Create bind group called [doublingBG] using layout [doublingBGL] {oc}
         Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
     {cc} :: {color1}
     compile shaders :: {color1}
     run shader [doublingShader] with bind group [doublingBG] dimensions x: [1] y: [1] z: [1] :: {color1}
     Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
-    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
+    Read buffer [readBuffer] to arraybuffer [outputArrayBuffer] :: {color1}
+    View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
+    set [my variable v] to (Get view [outputView] as array :: {color1})
 </pre>
 
 
@@ -461,14 +482,17 @@
     {cc} :: color {color1}
     Create buffer called [inputBuffer] with size\(in bytes\) [12] and usage flags (Usage (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
     Create buffer called [readBuffer] with size\(in bytes\) [12] and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
-    Write [3] elements of data from array (F32 array from array [\[1,2,3\]] :: reporter {color1}) to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
+    Create arraybuffer and view called [inputArrayBuffer] from array [\[1, 2, 3\]] of type (Float32Array v) :: {color1}
+    Write [3] elements of data from arraybuffer [inputArrayBuffer] to buffer [inputBuffer] from offset [0] to offset [0] :: {color1}
     Create bind group called [doublingBG] using layout [doublingBGL] {oc}
         Add bind group entry with binding [0] of type (buffer v) using resource named [inputBuffer] :: {color1}
     {cc} :: {color1}
     compile shaders :: {color1}
     run shader [doublingShader] with bind group [doublingBG] dimensions x: [1] y: [1] z: [1] :: {color1}
     Copy [12] bytes of data from buffer [inputBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
-    set [my variable v] to (Read buffer [readBuffer] :: reporter {color1}) :: variables
+    Read buffer [readBuffer] to arraybuffer [outputArrayBuffer] :: {color1}
+    View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
+    set [my variable v] to (Get view [outputView] as array :: {color1})
 </pre>
 
 <p>And we're done! That was quite a large explanation for so little code. As promised, here's a link to <a href={assets.FinishedBasicsImg} download="FinishedBasicsImg.svg">the image</a>, and in case you're having issues here's <a href={assets.FinishedBasicsProject} download="FinishedBasics.sb3">the sb3</a>. If you have any questions, check the next few pages, otherwise dm derpygamer2142 on discord.</p>
