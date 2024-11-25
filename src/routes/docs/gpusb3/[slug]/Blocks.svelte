@@ -148,11 +148,26 @@
     Buffer layout entry descriptor with usage type (usageType v) :: {color1} reporter
 </pre>
 <ul>
-    <p>Usage type - How this buffer will be used. Possible values: </p>
+    <p>usageType - How this buffer will be used. Possible values: </p>
     <ul>
         <li>read-only-storage is for a buffer that will only be read from</li>
         <li>storage is for a buffer that will be written to and possibly read from</li>
         <li>uniform is essentially read-only-storage except it's optimized for buffers that won't change much(or at all)</li>
+    </ul>
+</ul>
+
+<Spacer space="20px" />
+
+<pre class="blocks">
+    Texture layout entry descriptor with usage type (usage v) and format (format v) :: reporter {color1}
+</pre>
+
+<ul>
+    <p>usage - How this texture will be used. Possible values:</p>
+    <ul>
+        <li>write-only - This texture can only be written to by a shader.</li>
+        <li>read-only - This texture can only be read from by a shader.</li>
+        <li>read-write - This texture can be read from and written to by a shader.</li>
     </ul>
 </ul>
 
@@ -359,7 +374,206 @@
     <p>texture - The texture to write the data to. Must have a flag of COPY_DST.</p>
 </ul>
 
-<Spacer space="50px" />
+<Spacer space="100px" />
+<pre class="blocks">
+    List arraybuffers :: reporter {color1}
+</pre>
+
+<p>This returns a stringified array of all available arraybuffers. This includes arraybuffers from <a href="https://gallery.miyo.lol/">miyo's arraybuffer extension</a>.</p>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Create arraybuffer called [name] with length [length] :: {color1}
+</pre>
+
+<p>Creates a new arraybuffer, initialized to all zeroes. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">the mdn reference</a></p>
+    
+<h3>Inputs</h3>
+
+<ul>
+    <p>name - The name of the arraybuffer to create.</p>
+    <p>length - The length of the arraybuffer, in bytes.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Create arraybuffer and view called [name] from array [data] of type (type v) :: {color1}
+</pre>
+
+<p>Creates a new view and arraybuffer from the given data.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>name - The names of the arraybuffer and view to create</p>
+    <p>data - The data to use when creating the view and arraybuffer.</p>
+    <p>type - A <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typedArray</a> type.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Delete arraybuffer [arrayBuffer] :: {color1}
+</pre>
+
+<p>Deletes an arraybuffer.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>arrayBuffer - The arraybuffer to delete</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Resize arraybuffer (arrayBuffer v) to [size] bytes :: {color1}
+</pre>
+
+<p>Resizes an arraybuffer, see javascript's ArrayBuffer.prototype.resize()</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>arrayBuffer - The arraybuffer to resize</p>
+    <p>size - The new size, in bytes</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    List views :: reporter {color1}
+</pre>
+
+<p>Lists all arraybuffer views.</p>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    View arraybuffer (arrayBuffer v) as (type v) called [name] :: {color1}
+</pre>
+
+<p>Creates a new arraybuffer view of the given type, see <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">the mdn reference</a>.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>arrayBuffer - The arraybuffer to view</p>
+    <p>type - The type of the TypedArray view to create.</p>
+    <p>name - The name of the view to create</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Delete view [view] :: {color1}
+</pre>
+
+<p>Deletes the given view.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>view - The view to delete</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Set item [index] of view [view] to [value] :: {color1}
+</pre>
+
+<p>Sets the value in a view.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>index - The index of the value to set.</p>
+    <p>view - The view to manipulate.</p>
+    <p>value - The value to set the index to.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Copy data from array [array] to view [view] from index [index] :: {color1}
+</pre>
+
+<p>Copies data from a stringified array to the given view. See TypedArray.prototype.set().</p>
+
+<ul>
+    <p>array - The array of data to get the data from.</p>
+    <p>view - The view to copy the data into.</p>
+    <p>index - The index to start copying data into.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Fill items [start] to [end] of view [view] with [value] :: {color1}
+</pre>
+
+<p>Fills items in a view with the given value. See TypedArray.prototype.fill().</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>start - The index to start filling at, inclusive.</p>
+    <p>end - The index to stop filling at, exclusive.</p>
+    <p>view - The view to manipulate.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Item [index] of arraybuffer view [view] :: reporter {color1}
+</pre>
+
+<p>Returns the data at the index of the given view.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>index - The index to read, 0 indexed.</p>
+    <p>view - The view to read.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Items [start] to [end] of view [view] :: reporter {color1}
+</pre>
+
+<p>Returns a stringified subarray of a view. See TypedArray.prototype.slice().</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>start - The index to start reading at, inclusive.</p>
+    <p>end - The index to stop reading at, exclusive.</p>
+    <p>view - The view to read data from.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Get view [view] as array :: reporter {color1}
+</pre>
+
+<p>Returns a stringified array representation of a view. Equivilant to JSON.stringify(Array.from(TypedArray)).</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>view - The view to read.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    (property) of view [view] :: reporter {color1}
+</pre>
+
+<p>Gets a proprety from a view. See TypedArray.prototype properties.</p>
+
+<ul>
+    <p>property - The property to get. Possible values:</p>
+    <ul>
+        <li>BYTES_PER_ELEMENT - Number of bytes per element. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/BYTES_PER_ELEMENT">mdn</a>.</li>
+        <li>byteLength - Length of the view, in bytes. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/byteLength">mdn</a>.</li>
+        <li>length - Length of the view, in elements. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray/length">mdn</a></li>
+    </ul>
+</ul>
+
+<Spacer space="100px" />
 <pre class="blocks" id="declareVar">
     Declare (variableType v) variable as [variableName] with value [value]: (type v) :: {color1}
 </pre>
@@ -450,7 +664,7 @@
     Get variable [variableName] :: reporter {color1}
 </pre>
 
-<p>Get's the variable. There's not much to this.</p>
+<p>Gets the variable. There's not much to this.</p>
 
 <h3>Inputs</h3>
 
@@ -458,6 +672,18 @@
     <p>variableName - The variable name. <strong>Does not allow inputs.</strong></p>
 </ul>
 
+<Spacer space="50px" />
+<pre class="blocks">
+    Pointer to variable [variable] :: reporter {color1}
+</pre>
+
+<p>Returns a pointer to the given variable. If you use c this is <code>&someVar</code>, same thing with rust/wgsl. This is required for some blocks.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>variable - The variable to point to.</p>
+</ul>
 
 <Spacer space="50px" />
 <pre class="blocks" id="getArray">
@@ -743,23 +969,68 @@
 
 <p>Creates an atomic type, which can be put in the type input of the declare variable block. Atomic variables allow you to read and write to a variable without introducing a race condition, see <a href="/docs/gpusb3/advanced">advanced</a>.</p>
 
+<h3>Inputs</h3>
+
 <ul>
     <p>type - Either an i32 or u32. The type of variable this atomic will be.</p>
 </ul>
 
-<Spacer space="50px" />
+<Spacer space="25px" />
 <pre class="blocks">
     Load atomic [atomic] :: reporter {color1}
 </pre>
 
 <p>Reads an atomic variable in a thread safe way.</p>
 
+<h3>Inputs</h3>
+
 <ul>
     <p>atomic - A <a href="#pointer">pointer</a> to an atomic variable.</p>
 </ul>
 
-<Spacer space="50px" />
+<Spacer space="25px" />
+<pre class="blocks">
+    Perform operation (operation v) on atomic [atomic] with value [value] :: {color1}
+    Perform operation (operation v) on atomic [atomic] with value [value] :: reporter {color1}
+</pre>
 
+<p>This performs the given operation on an atomic variable. See <a href="https://www.w3.org/TR/WGSL/#atomic-builtin-functions">the wgsl spec</a>.</p>
+
+<ul>
+    <p>operation - The operation to perform. Possible values:</p>
+    <ul>
+        <li>atomicStore</li>
+        <li>atomicAdd</li>
+        <li>atomicSub</li>
+        <li>atomicMax</li>
+        <li>atomicMin</li>
+        <li>atomicAnd</li>
+        <li>atomicOr</li>
+        <li>atomicXor</li>
+        <li>atomicExchange</li>
+        <li>atomicCompareExchangeWeak</li>
+    </ul>
+    <p>atomic - A pointer to an atomic variable.</p>
+    <p>value - An i32 or u32 value to use in the operation.</p>
+</ul>
+
+<Spacer space="25px" />
+<pre class="blocks">
+    Barrier (barrierType v) :: {color1}
+</pre>
+
+<p>A control barrier that pauses certain threads based on the barrierType. See <a href="https://www.w3.org/TR/WGSL/#sync-builtin-functions">the wgsl spec</a>.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>barrierType - The type of control barrier to use. Possible values:</p>
+    <ul>
+        <li>storageBarrier - Pauses threads that are reading/writing to a storage variable until they have all reached this barrier.</li>
+        <li>textureBarrier - Pauses all threads that are reading/writing to a texture until they have reached this barrier.</li>
+        <li>workgroupBarrier - Pauses threads that are reading/writing to a workgroup variable until they have all reached this variable.</li>
+    </ul>
+</ul>
 
 <Spacer space="50px" />
 <pre class="blocks">

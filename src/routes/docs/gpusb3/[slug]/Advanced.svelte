@@ -40,6 +40,7 @@
 
 <ul>
     <li>Atomics and thread safety stuff</li>
+    <li>Textures(coming soon)</li>
 </ul>
 
 <h2>Atomics and thread safety</h2>
