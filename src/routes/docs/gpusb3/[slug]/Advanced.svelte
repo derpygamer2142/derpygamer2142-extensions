@@ -39,11 +39,12 @@
 <p>Topics covered here:</p>
 
 <ul>
-    <li>Atomics and thread safety stuff</li>
-    <li>Textures(coming soon)</li>
+    <li><a href="#atomics">Atomics and thread safety stuff</a></li>
+    <li><a href="#textures">Textures</a></li>
+    <li><a href="#alignment">Alignment and padding(unfinished)</a></li>
 </ul>
 
-<h2>Atomics and thread safety</h2>
+<h1 id="atomics">Atomics and thread safety</h1>
 
 <p>An atomic is a variable that is shared across a workgroup, and when written to guarantees that multiple threads don't write to it at the same time, resulting in data loss. This is referred to as a <a href="https://en.wikipedia.org/wiki/Race_condition">race condition</a>. Atomics can either be a signed or unsigned 32 bit integer(i32 or u32). Here's what the block to construct them looks like:</p>
 
@@ -296,3 +297,193 @@
     View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
     set [out v] to (Get view [outputView] as array :: {color1})
 </pre>
+
+<p>SB3: <a href={assets.AtomicDemo} download="AtomicDemo.sb3">here</a></p>
+
+<Spacer space="250px" />
+<h1>Textures</h1>
+
+<p>Part of the appeal of compute shaders is the ability to make fast post processing effects. You could copy texture data to a buffer and read from that, but it's faster to use built in texture which I'll show here by making a simple shader to read a pixel from a costume. To start off, we need to create the bind group layout and stuff.</p>
+
+<pre class="blocks">
+    Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (type v) and format (format v) :: reporter {color1}) :: {color1}
+</pre>
+
+<p>This code does a couple of things. As with buffer entries, it has its own descriptor for a specific type. The texture descriptor has the following inputs:</p>
+<ul>
+    <p>type - This describes how the texture will be used. Possible values:</p>
+    <ul>
+        <li>read-only. We're only reading, so we'll use this.</li>
+        <li>write-only</li>
+        <li>read-write</li>
+    </ul>
+    <p>format - The color format to use. I have arbitrarily chosen rgba8unorm, meaning that there's 8 bits per channel, and each channel is unsigned(positive only) and normalized(0-1). For information on these different settings, either google it or look at <a href="https://www.w3.org/TR/webgpu/#plain-color-formats">the webgpu spec</a>.</p>
+</ul>
+
+<p>We'll also need a buffer, so our bind group layout looks like this:</p>
+
+<pre class="blocks">
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (read-only v) and format (rgba8unorm v) :: reporter {color1}) :: {color1}
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>Next we need to actually create our data. We can use the create texture block for this:</p>
+
+<pre class="blocks">
+    Create texture called [texture] with dimensions [width] [height], color format (colorFormat v) and usage [usage] :: {color1}
+    Texture usage (usage v) :: reporter {color1}
+</pre>
+
+<ul>
+    <p>Create texture block - Creates a new texture</p>
+    <li>texture - The name of the texture to create</li>
+    <li>width/height - The size of the texture, in pixels</li>
+    <li>colorFormat - The number of channels and bits per channel. There's a lot, see <a href="https://www.w3.org/TR/webgpu/#enumdef-gputextureformat">the webgpu spec</a>.</li>
+    <li>usage - Similar to the usage input for the create buffer block, this takes in usage flags.</li>
+    <p>Texture usage flag block - A flag describing how a texture will be used</p>
+    <li>usage - This block's flag. Possible values:</li>
+    <ul>
+        <li>COPY_SRC - This can be the source texture in the <a href="#copyTextureToBuffer">copy texture to buffer block</a>.</li>
+        <li>COPY_DST - This can be the destination texture in the <a href="#writeTexture">write texture data block</a>.</li>
+        <li>TEXTURE_BINDING - I don't think this is usable in compute shaders, but it's here just in case.</li>
+        <li>STORAGE_BINDING - This lets you bind this texture in a bind group.</li>
+    </ul>
+</ul>
+
+<p>We can use the looks+ extension to get the size of the texture we're using. Since we just want to be able to copy data to the texture and bind it to the shader, we will have a usage of STORAGE_BINDING | COPY_DST. We'll also need a buffer to write our texture data into, and to read from:</p>
+<!-- #9966FF -->
+<pre class="msmallblocks">
+    Create texture called [myTexture] with dimensions ([width v] of (costume2 v) :: #9966FF) ([height v] of (costume2 v) :: #9966FF), color format (rgba8unorm v) and usage (Usage (Texture usage (STORAGE_BINDING v) :: {color1}) | (Texture usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [workBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+</pre>
+
+<p>And we can create a bind group:</p>
+
+<pre class="msmallblocks">
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (read-only v) and format (rgba8unorm v) :: reporter {color1}) :: {color1}
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: {color1}
+    Create texture called [myTexture] with dimensions ([width v] of (costume2 v) :: #9966FF) ([height v] of (costume2 v) :: #9966FF), color format (rgba8unorm v) and usage (Usage (Texture usage (STORAGE_BINDING v) :: {color1}) | (Texture usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [workBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (storageTexture v) using resource named [myTexture] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [workBuffer] :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>Next we can write the data from costume2 to our texture:</p>
+
+<pre class="msmallblocks">
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (read-only v) and format (rgba8unorm v) :: reporter {color1}) :: {color1}
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: {color1}
+    Create texture called [myTexture] with dimensions ([width v] of (costume2 v) :: #9966FF) ([height v] of (costume2 v) :: #9966FF), color format (rgba8unorm v) and usage (Usage (Texture usage (STORAGE_BINDING v) :: {color1}) | (Texture usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [workBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (storageTexture v) using resource named [myTexture] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [workBuffer] :: {color1}
+    {cc} :: {color1}
+    Write texture data from (costume2 v) to texture [myTexture] :: {color1}
+</pre>
+
+<p>And we can add our code to compile/run the shader and get the output:</p>
+
+<pre class="msmallblocks">
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (read-only v) and format (rgba8unorm v) :: reporter {color1}) :: {color1}
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: {color1}
+    Create texture called [myTexture] with dimensions ([width v] of (costume2 v) :: #9966FF) ([height v] of (costume2 v) :: #9966FF), color format (rgba8unorm v) and usage (Usage (Texture usage (STORAGE_BINDING v) :: {color1}) | (Texture usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [workBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (storageTexture v) using resource named [myTexture] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [workBuffer] :: {color1}
+    {cc} :: {color1}
+    Write texture data from (costume2 v) to texture [myTexture] :: {color1}
+    compile shaders :: {color1}
+    Run shader [myShader] using bind group [myBindGroup] dimensions x: [1] y: [1] z: [1] :: {color1}
+    Copy [16] bytes of data from buffer [workBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
+    Read buffer [readBuffer] to arraybuffer [myArrayBuffer] :: {color1}
+    View arraybuffer (myArrayBuffer v) as (Float32Array v) called [myView] :: {color1}
+    set [my variable v] to (Get view [myView] as array :: {color1})
+</pre>
+
+<p>Now we can start on our shader. We can start by binding the texture in slot 1 to a variable, which we'll call myTex</p>
+
+<pre class="blocks">
+    Bind shader resource #[0] to variable [myTex] with settings [] type (Texture type of (rgba8unorm v) with access (read v) :: {color1}) :: {color1}
+</pre>
+
+<p>Small note here: The settings input is blank because that makes the binding become var instead of the usual var&lt;usage settings&gt;. Next we bind the buffer:</p>
+<pre class="msmallblocks">
+    Bind shader resource #[0] to variable [myTex] with settings [] type (Texture type of (rgba8unorm v) with access (read v) :: {color1}) :: {color1}
+    Bind shader resource #[1] to variable [workBuffer] with settings (Variable usage (storage v) next (Variable usage (read_write v) next [] :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+</pre>
+
+<p>Now in our compute shader, we can declare a variable and set its value to the wgsl builtin function textureLoad. This returns the color data differently depending on the color format we set earlier, which in this case is rgba8unorm so it returns a vec4 of floats. It takes an argument of a vec2&lt;i32&gt; or vec2&lt;u32&gt;, and it ends up looking like this:</p>
+
+<pre class="smallblocks">
+    Compute shader with workgroup size [\[1\]] {oc}
+        declare (let v) variable with value (WGSL builtin (textureLoad v) with args (Function arg input [someText], next (Function arg input (Construct type (Create type (vec2 v) of (Base type (i32 v) :: {color1}) :: {color1}) with values [0] :: {color1}), next [] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>Next we can set the data in our output buffer:</p>
+
+<pre class="smallblocks">
+    Compute shader with workgroup size [\[1\]] {oc}
+        declare (let v) variable as [c] with value (WGSL builtin (textureLoad v) with args (Function arg input [someText], next (Function arg input (Construct type (Create type (vec2 v) of (Base type (i32 v) :: {color1}) :: {color1}) with values [0] :: {color1}), next [] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [0] :: {color1}) (= v) (In object [c] get property [r] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [1] :: {color1}) (= v) (In object [c] get property [g] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [2] :: {color1}) (= v) (In object [c] get property [b] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [3] :: {color1}) (= v) (In object [c] get property [a] :: {color1}) :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>That's our code finished! If we put it all together it looks like this:</p>
+
+<pre class="smallblocks">
+    Bind shader resource #[0] to variable [myTex] with settings [] type (Texture type of (rgba8unorm v) with access (read v) :: {color1}) :: {color1}
+    Bind shader resource #[1] to variable [workBuffer] with settings (Variable usage (storage v) next (Variable usage (read_write v) next [] :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Compute shader with workgroup size [\[1\]] {oc}
+        declare (let v) variable as [c] with value (WGSL builtin (textureLoad v) with args (Function arg input [someText], next (Function arg input (Construct type (Create type (vec2 v) of (Base type (i32 v) :: {color1}) :: {color1}) with values [0] :: {color1}), next [] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [0] :: {color1}) (= v) (In object [c] get property [r] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [1] :: {color1}) (= v) (In object [c] get property [g] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [2] :: {color1}) (= v) (In object [c] get property [b] :: {color1}) :: {color1}
+        Variable (In object [workBuffer] get index [3] :: {color1}) (= v) (In object [c] get property [a] :: {color1}) :: {color1}
+    {cc} :: {color1}
+
+    when flag clicked
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (storageTexture v) and descriptor (Texture layout entry descriptor with usage type (read-only v) and format (rgba8unorm v) :: reporter {color1}) :: {color1}
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1}
+    {cc} :: {color1}
+    Create texture called [myTexture] with dimensions ([width v] of (costume2 v) :: #9966FF) ([height v] of (costume2 v) :: #9966FF), color format (rgba8unorm v) and usage (Usage (Texture usage (STORAGE_BINDING v) :: {color1}) | (Texture usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [workBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [readBuffer] with size\(in bytes\) (16) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (storageTexture v) using resource named [myTexture] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [workBuffer] :: {color1}
+    {cc} :: {color1}
+    Write texture data from (costume2 v) to texture [myTexture] :: {color1}
+    compile shaders :: {color1}
+    Run shader [myShader] using bind group [myBindGroup] dimensions x: [1] y: [1] z: [1] :: {color1}
+    Copy [16] bytes of data from buffer [workBuffer] from position [0] to buffer [readBuffer] at position [0] :: {color1}
+    Read buffer [readBuffer] to arraybuffer [myArrayBuffer] :: {color1}
+    View arraybuffer (myArrayBuffer v) as (Float32Array v) called [myView] :: {color1}
+    set [my variable v] to (Get view [myView] as array :: {color1})
+</pre>
+<p>SB3 <a href={assets.TextureDemo} download="TextureDemo.sb3">here</a></p>
+<p>You might be wondering why you can't just set the type of the output buffer to an array of vec4s. This brings us into our next topic:</p>
+
+<h1 id="alignment">Alignment and padding</h1>
+
+<p>This is complicated and I can't be bothered explaining it right now. Go read <a href="https://webgpufundamentals.org/webgpu/lessons/webgpu-memory-layout.html">the webgpufundamentals page</a></p>

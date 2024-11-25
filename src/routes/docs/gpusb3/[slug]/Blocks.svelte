@@ -136,6 +136,7 @@
     <li>bindingType - The type of resource you are going to put in this slot. Here's the possible values for this:</li>
     <ul>
         <li>buffer - Essentially just a list, but instead of items it sometimes has individual bytes. A buffer can only have numbers in it.</li>
+        <li>storageTexture - A texture which you can read from and write to. More info on the <a href="/advanced#textures">advanced page</a>.</li>
     </ul>
     <li>bindGroupLayoutEntryDescriptor - Fancy name, fairly simple input. Takes an input of an <a href="#bindGroup">entry descriptor block</a>. This input describes how this slot will be used, and the type of descriptor depends on the bindingType.</li>
 </ul>
@@ -203,6 +204,7 @@
     <p>bindingType - The type of resource to bind here. Valid types:</p>
     <ul>
         <li>buffer</li>
+        <li>storageTexture</li>
     </ul>
     <p>resourceName - The name of the resource, corresponds to a <a href="#resourceDefinitions">resource definition</a> of the previously specified type.</p>
 </ul>
