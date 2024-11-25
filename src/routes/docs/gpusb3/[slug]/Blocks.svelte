@@ -767,6 +767,67 @@
 </ul>
 
 <Spacer space="50px" />
+<pre class="blocks">
+    Texture type of (format v) with access (access v) :: reporter {color1}
+</pre>
+
+<p>This creates a texture type. Not much to it, the settings input when binding must be empty.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>format - Same as other notes on the color format, read <a href="https://www.w3.org/TR/webgpu/#plain-color-formats">the webgpu spec</a></p>
+    <p>access - How this texture will be used. Possible values:</p>
+    <ul>
+        <li>read</li>
+        <li>write</li>
+        <li>read_write</li>
+    </ul>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Declare struct [name] {oc}
+        Properties... :: {color2}
+    {cc} :: {color1}
+</pre>
+
+<p>A struct is like a class but without a constructor. It also exists in a lot of other languages, just google it.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>properties - <a href="#structProperty">Struct property blocks</a> describing the properties in this struct.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Add property called [property] with type (type v) to struct :: {color1}
+</pre>
+
+<p>This adds a property to the struct it is placed in.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>property - The name of the property to add.</p>
+    <p>type - The type of the property to add. You can put a custom type in here or use the dropdown.</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks">
+    Type of struct [struct] :: reporter {color1}
+</pre>
+
+<p>This block allows you to use a struct as a type.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>struct - The name of the struct to use as a type.</p>
+</ul>
+
+<Spacer space="50px" />
 <pre class="blocks" id="baseType">
     Base type (type v) :: reporter {color1}
 </pre>
