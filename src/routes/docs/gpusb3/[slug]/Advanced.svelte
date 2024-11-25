@@ -63,7 +63,7 @@
 <p>Starting from the scratch code, we'll need 3 buffers: one for providing an input to the shader, one for the shader to write to, and a third to read the shader's output. This bind group layout looks like this:</p>
 
 <pre class="blocks">
-    Create bind group called [myBindGroupLayout] {oc}
+    Create bind group layout called [myBindGroupLayout] {oc}
         Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (read-only-storage v) :: {color1}) :: {color1} 
         Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1} 
     {cc} :: {color1}
@@ -185,4 +185,114 @@
     {cc} :: {color1}
 </pre>
 
-<p>That's our shader finished. Note to self: finish</p>
+<p>That's our shader finished. Now we need to finish the data management side, which isn't too complicated. Right now we have:</p>
+
+<pre class="blocks">
+    Create buffer called [input] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [work] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [output] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (read-only-storage v) :: {color1}) :: {color1} 
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1} 
+    {cc} :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [input] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [work] :: {color1}
+    {cc} :: {color1}
+</pre>
+
+<p>Our data is going to be an array of random numbers, which we can make using the turbowarp JSON extension:</p>
+<small>I highly recommend using a different extension, this one is really slow because it parses/stringifies the object in every block!</small>
+
+<pre class="blocks">
+    set [input data v] to [\[\]]
+    repeat [32] {oc}
+        set [input data v] to (add (pick random [-15] to [15]) to array (input data) :: #3271D0)
+    {cc} :: control
+</pre>
+
+<p>Next we can create an arraybuffer and view from this data and copy it to our input buffer:</p>
+
+<pre class="blocks">
+    set [input data v] to [\[\]]
+    repeat [32] {oc}
+        set [input data v] to (add (pick random [-15] to [15]) to array (input data) :: #3271D0)
+    {cc} :: control
+    Create arraybuffer and view called [data] from array (input data) of type (Float32Array v) :: {color1}
+    Write [32] elements of data from arraybuffer [data] to buffer [input] from offset [0] to offset [0] :: {color1}
+</pre>
+
+<p>We can add that to our code, along with compiling and running the shader:</p>
+
+<pre class="blocks">
+    Create buffer called [input] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [work] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [output] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (read-only-storage v) :: {color1}) :: {color1} 
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1} 
+    {cc} :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [input] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [work] :: {color1}
+    {cc} :: {color1}
+    set [input data v] to [\[\]]
+    repeat [32] {oc}
+        set [input data v] to (add (pick random [-15] to [15]) to array (input data) :: #3271D0)
+    {cc} :: control
+    Create arraybuffer and view called [data] from array (input data) of type (Float32Array v) :: {color1}
+    Write [32] elements of data from arraybuffer [data] to buffer [input] from offset [0] to offset [0] :: {color1}
+    compile shaders :: {color1}
+    Run shader [myShader] using bind group [myBindGroup] dimensions x: [32] y: [1] z: [1] :: {color1}
+</pre>
+<small>You don't need to write the data to a buffer before binding it, hence why our number generation code is right before compiling and running the shader.</small>
+
+<p>Finally we can do the same thing we did in the basic doubling shader where we copy data from the work buffer to the read buffer, and read that:</p>
+
+<pre class="blocks">
+    Copy ((32) * (4)) bytes of data from buffer [work] from position [0] to buffer [output] at position [0] :: {color1}
+    Read buffer [output] to arraybuffer [outputArrayBuffer] :: {color1}
+    View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
+    set [out v] to (Get view [outputView] as array :: {color1})
+</pre>
+
+<p>That's everything finished! If you run this you should see a bunch of weird numbers, here's all the code put together:</p>
+
+<pre class="msmallblocks">
+    Def shader [myShader] using bind group layout [myBindGroupLayout] :: hat {color1}
+    Bind shader resource # [0] to variable [input] with settings (Variable usage (storage v) next (Variable usage (read v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Bind shader resource # [1] to variable [output] with settings (Variable usage (storage v) next (Variable usage (read_write v) :: {color1}) :: {color1}) type (Create type (array v) of (Base type (f32 v) :: {color1}), length\(array only!\) [] :: {color1}) :: {color1}
+    Declare variable (Variable usage (workgroup v) next [] :: {color1}) variable as [sum] with value []: (Create atomic of type (i32 v) :: {color1}) :: {color1}
+    Compute shader with workgroup size [\[1\]] {oc}
+        Perform operation (atomicStore v) on atomic (Pointer to variable [sum] :: {color1}) with value [0] :: {color1}
+        Barrier (workgroupBarrier v) :: {color1}
+        Perform operation (atomicAdd v) on atomic (Pointer to variable [sum] :: {color1}) with value (WGSL builtin (i32 v) with args (In object [input] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) :: {color1}) :: {color1}
+        Barrier (storageBarrier v) :: {color1}
+        Variable (In object [output] get index (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) (= v) (  (WGSL builtin (f32 v) with args (Load atomic (Pointer to variable [sum] :: {color1}) :: {color1}) :: {color1}) / (( WGSL builtin (f32 v) with args (In object [workgroup_id] get property [x] :: {color1}) :: {color1}) + [1.0])  ) :: {color1}
+    {cc} :: {color1}
+
+    when flag clicked
+    Create buffer called [input] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [work] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (STORAGE v) :: {color1}) | (Buffer usage (COPY_SRC v) :: {color1}) :: {color1}) :: {color1}
+    Create buffer called [output] with size\(in bytes\) ([32] * [4]) and usage flags (Usage (Buffer usage (MAP_READ v) :: {color1}) | (Buffer usage (COPY_DST v) :: {color1}) :: {color1}) :: {color1}
+    Create bind group layout called [myBindGroupLayout] {oc}
+        Add bind group layout entry with binding [0] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (read-only-storage v) :: {color1}) :: {color1} 
+        Add bind group layout entry with binding [1] for type (buffer v) and descriptor (Buffer layout entry descriptor with usage type (storage v) :: {color1}) :: {color1} 
+    {cc} :: {color1}
+    Create bind group called [myBindGroup] using layout [myBindGroupLayout] {oc}
+        Add bind group entry with binding [0] of type (buffer v) using resource named [input] :: {color1}
+        Add bind group entry with binding [1] of type (buffer v) using resource named [work] :: {color1}
+    {cc} :: {color1}
+    set [input data v] to [\[\]]
+    repeat [32] {oc}
+        set [input data v] to (add (pick random [-15] to [15]) to array (input data) :: #3271D0)
+    {cc} :: control
+    Create arraybuffer and view called [data] from array (input data) of type (Float32Array v) :: {color1}
+    Write [32] elements of data from arraybuffer [data] to buffer [input] from offset [0] to offset [0] :: {color1}
+    compile shaders :: {color1}
+    Run shader [myShader] using bind group [myBindGroup] dimensions x: [32] y: [1] z: [1] :: {color1}
+    Copy ((32) * (4)) bytes of data from buffer [work] from position [0] to buffer [output] at position [0] :: {color1}
+    Read buffer [output] to arraybuffer [outputArrayBuffer] :: {color1}
+    View arraybuffer (outputArrayBuffer v) as (Float32Array v) called [outputView] :: {color1}
+    set [out v] to (Get view [outputView] as array :: {color1})
+</pre>
