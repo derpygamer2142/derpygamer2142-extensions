@@ -55,7 +55,7 @@
     {cc} :: {color1}
 </pre>
 
-<p><small>Don't worry about workgroup size quite yet. It's explained <a href="404">here(sorry, i still need to explain this!)</a></small></p>
+<p><small>Don't worry about workgroup size quite yet. It's explained <a href="/advanced#workgroups">here</a></small></p>
 
 <p>Let's define an array in our compute shader, named "data". First we need to make the type so we can construct it. We will have an array of 3 floats, which in blocks looks like this:</p>
 
@@ -140,7 +140,7 @@
     Run shader [shader name] using bind group [bind group name] dimensions x: [x dim] y: [y dim] z: [z dim] :: {color1}
 </pre>
 
-<p>Our shader name is whatever our shader is called, and the args is explained later. The dimensions are the number of workgroups on each axis, which is explained <a href="404">here</a>. For now, let's just dispatch 1 workgroup per axis.</p>
+<p>Our shader name is whatever our shader is called, and the args is explained later. The dimensions are the number of workgroups on each axis, which is explained <a href="/advanced#workgroups">here</a>. For now, let's just dispatch 1 workgroup per axis.</p>
 
 <pre class="smallblocks">
     Def shader [doublingShader] with bind group layout [] :: hat {color1}
@@ -324,7 +324,7 @@
     <li>bufferName - The buffer to write to.</li>
     <li>off1 - The offset to start reading from, see note in amount.</li>
     <li>off2 - The offset to start writing to, see note in amount.</li>
-    <p>Create arraybuffer - this adds a new arraybuffer and arraybuffer view from the given array. See <a href="404">arraybuffers page</a>.</p>
+    <p>Create arraybuffer - this adds a new arraybuffer and arraybuffer view from the given array. More information at the <a href="/blocks#createArraybuffer">block list entry</a>.</p>
     <li>name - The name to use when creating the objects.</li>
     <li>data - A stringified array of <b>numbers</b>. You can make this using a json extension.</li>
     <li>dataType - A typedArray type. See <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#typedarray_objects">the mdn reference</a>.</li>

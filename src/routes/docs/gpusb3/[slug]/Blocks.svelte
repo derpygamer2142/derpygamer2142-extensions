@@ -384,7 +384,7 @@
 <p>This returns a stringified array of all available arraybuffers. This includes arraybuffers from <a href="https://gallery.miyo.lol/">miyo's arraybuffer extension</a>.</p>
 
 <Spacer space="25px" />
-<pre class="blocks">
+<pre class="blocks" id="createArraybuffer">
     Create arraybuffer called [name] with length [length] :: {color1}
 </pre>
 

@@ -2,6 +2,8 @@
     import { onMount } from "svelte"
     import { assets } from "$lib/assets/images/assetList.js"
     import Spacer from "$lib/Spacer.svelte";
+    import GPUWorkgroup from "$lib/assets/images/gpu-workgroup.svg"
+    import GPUWorkgroupDispatch from "$lib/assets/images/gpu-workgroup-dispatch.svg"
 
     onMount(() => {
         scratchblocks.renderMatching('pre.blocks', {
@@ -42,6 +44,7 @@
     <li><a href="#atomics">Atomics and thread safety stuff</a></li>
     <li><a href="#textures">Textures</a></li>
     <li><a href="#alignment">Alignment and padding(unfinished)</a></li>
+    <li><a href="#workgroups">Workgroups and threads</a></li>
 </ul>
 
 <h1 id="atomics">Atomics and thread safety</h1>
@@ -487,3 +490,29 @@
 <h1 id="alignment">Alignment and padding</h1>
 
 <p>This is complicated and I can't be bothered explaining it right now. Go read <a href="https://webgpufundamentals.org/webgpu/lessons/webgpu-memory-layout.html">the webgpufundamentals page</a></p>
+
+<h1 id="workgroups">Workgroups and Threads</h1>
+
+<p>In the compute shader block there's an input for the workgroup size. This is the number of threads in a workgroup. A workgroup is a set of threads that is able to share data via workgroup variables, which we talked about earlier in the atomic variables section. Here's a visual aid I stole from webgpufundamentals:</p>
+
+<img src={GPUWorkgroup} alt="this is supposed to be a visual aid but you're kinda screwed cuz you can't see it">
+
+<p>As you can see the size of the workgroup is described in three dimensions. Now, in the run shader block you can describe the dispatch dimensions. This is the number of workgroups to create on each dimension. I'm not sure how to describe this in any other way, so here's another stolen visual aid</p>
+
+<img src={GPUWorkgroupDispatch} alt="see previous note">
+
+<p>Each unit on the dispatch is made up of the previously described workgroup threads. Your compute shader comes with some builtin positions in the dispatch/workgroup:</p>
+
+<ul>
+    <p>vec3&lt;u32&gt; local_invocation_id - The position of the thread within the workgroup</p>
+    <p>vec3&lt;u32&gt; workgroup_id - The position of the workgroup within the dispatch</p>
+    <p>u32 local_invocation_index - local_invocation_id linearized</p>
+    <p>vec3&lt;u32&gt; global_invocation_id - Freaky thing that is apparently equal to <code>workgroup_id * workgroup_size + local_invocation_id</code></p>
+    <p>vec3&lt;u32&gt; num_workgroups - The number of workgroups on each axis</p>
+</ul>
+
+<style>
+    img {
+        width: 25vw;
+    }
+</style>
