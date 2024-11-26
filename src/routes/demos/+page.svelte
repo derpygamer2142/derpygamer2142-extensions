@@ -9,9 +9,9 @@
 
 
 <div id="demos">
-    <Demo project="doublingdemo.zip" />
-    <Demo project="atomicDemo.zip" />
-    <Demo project="textureDemo.zip" />
+    <Demo project="doublingdemo.zip" title="Doubling shader(gpu.sb3)"/>
+    <Demo project="atomicDemo.zip" title="Atomic shader(gpu.sb3)"/>
+    <Demo project="textureDemo.zip" title="Texture shader(gpu.sb3)"/>
 </div>
 
 <style>
