@@ -1,13 +1,22 @@
 <script>
-    import { assets } from "$lib/assets/images/assetList.js"
+    import { page } from "$app/stores"
 
     export let project = "DoublingDemo"
+    export let title = "Doubling shader(gpu.sb3)"
+    console.log($page.url.origin+"/"+project)
 </script>
 
-<iframe src={"https://turbowarp.org/embed?project_url="+encodeURI("/"+project)} title={project}></iframe>
+<div>
+    <iframe src={"https://turbowarp.org/embed?autoplay&project_url="+encodeURI($page.url.origin+"/"+project)} title={project}></iframe>
+    <h3>{title}</h3>
+</div>
+
+
+
 
 <style>
     iframe {
-        width: 15vw;
+        width: 30vw;
+        height: calc(30vw / (4/3));
     }
 </style>

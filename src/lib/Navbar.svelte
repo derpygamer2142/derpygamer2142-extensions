@@ -5,7 +5,7 @@
 <div id="navbar">
     <a href="/">Home</a>
     <a href="/docs">Docs</a>
-    <a href="404">Demos</a>
+    <a href="/demos">Demos</a>
     <a href="https://derpygamer2142.com">Site home</a>
 </div>
 
