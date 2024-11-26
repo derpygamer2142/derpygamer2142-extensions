@@ -301,7 +301,7 @@
     set [out v] to (Get view [outputView] as array :: {color1})
 </pre>
 
-<p>SB3: <a href={assets.AtomicDemo} download="AtomicDemo.sb3">here</a></p>
+<p>SB3: <a href="/atomicDemo.zip" download="AtomicDemo.sb3">here</a></p>
 
 <Spacer space="250px" />
 <h1>Textures</h1>
@@ -484,7 +484,7 @@
     View arraybuffer (myArrayBuffer v) as (Float32Array v) called [myView] :: {color1}
     set [my variable v] to (Get view [myView] as array :: {color1})
 </pre>
-<p>SB3 <a href={assets.TextureDemo} download="TextureDemo.sb3">here</a></p>
+<p>SB3 <a href="/textureDemo.zip" download="TextureDemo.sb3">here</a></p>
 <p>You might be wondering why you can't just set the type of the output buffer to an array of vec4s. This brings us into our next topic:</p>
 
 <h1 id="alignment">Alignment and padding</h1>

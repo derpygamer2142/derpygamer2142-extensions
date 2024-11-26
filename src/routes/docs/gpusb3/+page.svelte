@@ -21,6 +21,7 @@
 
 <p>A good starting point would be the <a href="/docs/gpusb3/basics">basics</a>;</p>
 <p>Once you've done that you might want to learn how to do <a href="/docs/gpusb3/errors">error handling</a>;</p>
+<p>Then there's the <a href="/docs/gpusb3/advanced">advanced section</a>;</p>
 <p>Alternatively, you can look at the <a href="/docs/gpusb3/blocks">block list</a> if you are looking for a specific block;</p>
 <p>You can also look at the <a href="/docs/gpusb3/internals">internal documentation</a> if you want to know how this works or how to update it;</p>
 <p>If you're experiencing issues, you should probably look a the <a href="/docs/gpusb3/quirks">quirks</a> of this extension.</p>

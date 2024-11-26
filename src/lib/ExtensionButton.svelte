@@ -54,6 +54,7 @@
         font-size: 25px;
         border-radius: 10px;
         margin-bottom: 15px;
+        cursor: pointer;
     }
     img {
         width: 16vw;

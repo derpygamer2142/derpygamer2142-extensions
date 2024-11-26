@@ -495,4 +495,4 @@
     set [my variable v] to (Get view [outputView] as array :: {color1})
 </pre>
 
-<p>And we're done! That was quite a large explanation for so little code. As promised, here's a link to <a href={assets.FinishedBasicsImg} download="FinishedBasicsImg.svg">the image</a>, and in case you're having issues here's <a href={assets.DoublingDemo} download="FinishedBasics.sb3">the sb3</a>. If you have any questions, check the next few pages, otherwise dm derpygamer2142 on discord.</p>
+<p>And we're done! That was quite a large explanation for so little code. As promised, here's a link to <a href={assets.FinishedBasicsImg} download="FinishedBasicsImg.svg">the image</a>, and in case you're having issues here's <a href="/doublingdemo.zip" download="FinishedBasics.sb3">the sb3</a>. If you have any questions, check the next few pages, otherwise dm derpygamer2142 on discord.</p>

@@ -6,7 +6,7 @@
     <a href="/">Home</a>
     <a href="/docs">Docs</a>
     <a href="404">Demos</a>
-    <a href="404">Fourth thing</a>
+    <a href="https://derpygamer2142.com">Site home</a>
 </div>
 
 <style>
