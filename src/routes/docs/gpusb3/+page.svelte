@@ -11,7 +11,6 @@
 
 <Spacer space="150px"/>
 
-<h3>Warning: This extension is currently in beta! Everything is subject to change in such a way that might break projects!</h3>
 
 <Spacer space="75px"/>
 
