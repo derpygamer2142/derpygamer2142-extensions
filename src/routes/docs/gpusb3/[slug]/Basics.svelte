@@ -31,11 +31,11 @@
     move (10) steps
 </pre> -->
 
-<p>Once you've installed the extension from the <a href="/">home page</a>, load it unsandboxed in your mod of choice. If you get an alert that says "WebGPU is not supported." or "Failed to get WebGPU adapter.", reload. If this continues, check your browser's compatibility with webgpu at <a href="https://webgpu.io">webgpu.io</a>. This is a fairly new api, so not all browsers support it.</p>
+<p>Once you've installed the extension from the <a href="/">home page</a>, load it unsandboxed in your mod of choice. Run the "WebGPU available" block, and if it returns true you should be good to go. If it's not available, you may need to enable a browser flag or your browser may be incompatible. Check your browser's compatibility with webgpu at <a href="https://webgpu.io">webgpu.io</a>. This is a fairly new api, so not all browsers support it.</p>
 
 <Spacer space="65px" />
 
-<img src={assets.AdapterFail} alt="An alert saying failed to get adapter.">
+<img src={assets.WebGPUAvailable} alt="The webgpu available block returning true">
 
 <p>If your browser doesn't support webgpu, you're pretty much out of luck without switching to another browser.</p>
 

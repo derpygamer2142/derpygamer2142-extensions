@@ -28,6 +28,23 @@
 
 <p>This page contains a list of every block, its inputs, and what it does. You might be thinking "wow, that probably took a while to write"</p>
 
+<Spacer space="50px" />
+
+<pre class="blocks">
+    WebGPU available? :: boolean {color1}
+</pre>
+
+<p>This returns true if WebGPU is available in the current context, and false otherwise.</p>
+
+<Spacer space="25px" />
+
+<pre class="blocks">
+    Connected to GPU? :: boolean {color1}
+</pre>
+
+<p>This returns true if there is an active connection to the GPU, and false otherwise(after a DeviceLost error is thrown)</p>
+
+<Spacer space="50px" />
 
 <pre class="blocks" id="defShader">
     Def shader [shaderName] using bind group layout [bindGroupLayout] :: hat {color1}
@@ -299,7 +316,7 @@
 </ul>
 
 <Spacer space="50px" />
-<pre class="blocks">
+<pre class="blocks" id="copyTextureToBuffer">
     Copy texture [texture] to buffer [buffer] with dimensions [width] [height] :: {color1}
 </pre>
 
@@ -309,8 +326,24 @@
 
 <ul>
     <p>texture - The texture to copy data from. Must have a flag of COPY_SRC.</p>
-    <p>buffer - The buffer to copy data to. Must have a flag of COPY_DST</p>
-    <p>width/height - The dimensions to copy, in pixels(I think, idrk)</p>
+    <p>buffer - The buffer to copy data to. Must have a flag of COPY_DST.</p>
+    <p>width/height - The dimensions to copy, in pixels(I think, idrk).</p>
+</ul>
+
+<Spacer space="50px" />
+<pre class="blocks" id="copyBufferToTexture">
+    Copy elements with dimensions [width], [height] from offset [offset] in buffer [buffer] to texture [texture] :: {color1}
+</pre>
+
+<p>This copies data from a buffer to a texture.</p>
+
+<h3>Inputs</h3>
+
+<ul>
+    <p>width/height - The dimensions of the data to copy.</p>
+    <p>offset - The offset, in bytes, to start reading from.</p>
+    <p>buffer - The buffer to read the data from. Must have a usage flag of COPY_SRC.</p>
+    <p>texture - The texture to write the data to. Must have a usage flag of COPY_DST.</p>
 </ul>
 
 <Spacer space="50px" />
