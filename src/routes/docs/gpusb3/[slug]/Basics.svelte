@@ -156,7 +156,7 @@
     Run shader [doublingShader] with bind group [] dimensions x: [1] y: [1] z: [1] :: {color1}
 </pre>
 
-<p>Now you can click the green flag and hopefully have any errors! If you see something mentioning an error parsing wgsl, then something in your shader is wrong. Otherwise you should be good! Now, you may be thinking <i>"this is a great shader, finally I can easily and quickly double my hardcoded list of 3 numbers, but it would be great if I could give the shader an array to double instead of it being hardcoded!"</i>. Well you're in luck, because you can do this in the form of</p>
+<p>Now you can click the green flag and hopefully don't have any errors! If you see something mentioning an error parsing wgsl, then something in your shader is wrong. Otherwise you should be good! Now, you may be thinking <i>"this is a great shader, finally I can easily and quickly double my hardcoded list of 3 numbers, but it would be great if I could give the shader an array to double instead of it being hardcoded!"</i>. Well you're in luck, because you can do this in the form of</p>
 
 <!-- <pre class="blocks">
     Def shader [myShader] with resources [] :: hat {color1}
