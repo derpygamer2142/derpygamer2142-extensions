@@ -414,7 +414,7 @@
     List arraybuffers :: reporter {color1}
 </pre>
 
-<p>This returns a stringified array of all available arraybuffers. This includes arraybuffers from <a href="https://gallery.miyo.lol/">miyo's arraybuffer extension</a>.</p>
+<p>This returns a stringified array of all available arraybuffers. This includes arraybuffers from <a href="https://gallery.miyo.icu/">miyo's arraybuffer extension</a>.</p>
 
 <Spacer space="25px" />
 <pre class="blocks" id="createArraybuffer">
